@@ -23,7 +23,7 @@ function AppContent() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/api/managegroups" element={<ManageGroups />} />
                 <Route path="/api/manageevents" element={<ManageEvents />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/api/login" element={<Login />} />
                 <Route path="/api/documents" element={<Documents />} />
                 <Route path="/api/chat" element={<Chat />} />
                 <Route path="/api/manage-users" element={<ManageUsers />} />
