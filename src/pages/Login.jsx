@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function Login() {
     const { setUser } = useContext(AuthContext);
@@ -9,7 +10,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
+            const res = await axios.post(`${API_URL}/auth/login`, { email, password });
 
             if (res.data.token) {
                 localStorage.setItem("token", res.data.token);
