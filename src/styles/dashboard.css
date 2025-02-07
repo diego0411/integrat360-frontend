@@ -1,0 +1,154 @@
+/* 📌 Contenedor del Dashboard */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+/* 📆 Calendario */
+.calendar-container {
+    width: 100%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.react-calendar {
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 📍 Eventos en el calendario */
+.event-marker {
+    color: white;
+    background: #ff8c00; /* Naranja */
+    font-size: 12px;
+    border-radius: 5px;
+    padding: 2px 5px;
+    margin-top: 5px;
+}
+
+
+/* 📌 Lista de eventos */
+.event-list {
+    margin-top: 20px;
+    text-align: left;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.event-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.event-list li {
+    background: #f5f5f5; /* Gris claro */
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+    font-size: 16px;
+}
+
+/* 📌 Botón de agregar evento */
+.add-event-btn {
+    margin-top: 15px;
+    padding: 10px;
+    background: #28a745; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add-event-btn:hover {
+    background: #218838;
+}
+
+/* 📌 Formulario emergente */
+.event-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+}
+
+.event-form input, 
+.event-form textarea, 
+.event-form select {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #002147; /* Azul Oscuro */
+    border-radius: 5px;
+}
+
+.event-form button {
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.close-btn:hover {
+    background: #c82333;
+}
+
+/* 🎂 Notificaciones de Cumpleaños */
+.birthday-container {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.birthday-container h2 {
+    color: #ff8c00; /* Naranja */
+    text-align: center;
+}
+
+.birthday-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.birthday-container li {
+    font-size: 18px;
+    background: #fff3e0; /* Fondo suave naranja */
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 5px;
+    text-align: center;
+}

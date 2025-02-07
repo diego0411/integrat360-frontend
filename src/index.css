@@ -1,0 +1,300 @@
+/* 📌 Estilos Globales */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f5f5f5;  /* Fondo gris claro */
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 📆 Encabezado del calendario (Mes y Año) */
+.react-calendar__navigation {
+    color: #000 !important;  /* Negro */
+    font-weight: bold;
+    font-size: 22px; /* Aumentado */
+}
+
+/* 📆 Botones de navegación (Mes anterior/siguiente) */
+.react-calendar__navigation button {
+    color: #000 !important;  /* Negro */
+    font-weight: bold;
+    font-size: 18px; /* Aumentado */
+}
+
+/* 📌 Navbar */
+.navbar {
+    width: 100%;
+    background-color: #002147; /* Azul oscuro */
+    padding: 20px 25px; /* Aumentado */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 18px; /* Aumentado */
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 12px; /* Aumentado */
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.navbar a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+/* 📌 Botón de cierre de sesión */
+.logout-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px; /* Aumentado */
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+/* 📌 Contenedor Principal */
+.main-container {
+    width: 100%;
+    max-width: 1400px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px; /* Aumentado */
+}
+
+/* 📌 Dashboard Layout */
+.dashboard-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1400px;
+    gap: 25px; /* Aumentado */
+    margin-top: 20px;
+    flex-grow: 1; /* Elimina espacio en blanco */
+}
+
+/* 📆 Calendario */
+.react-calendar {
+    width: 100%;
+    background: white;
+    border-radius: 12px; /* Aumentado */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 20px; /* Aumentado */
+}
+
+/* 📅 Días del calendario */
+.react-calendar__tile {
+    color: #002147 !important; /* Azul oscuro */
+    font-weight: bold;
+    font-size: 18px; /* Aumentado */
+}
+
+/* 📆 Título del calendario (mes y año) */
+.react-calendar__navigation span {
+    color: black !important; /* Corregido */
+    font-weight: bold;
+    font-size: 22px; /* Aumentado */
+}
+
+/* 📌 Fines de semana en naranja */
+.react-calendar__tile--weekend {
+    color: #ff8c00 !important; /* Naranja */
+}
+
+/* 🔵 Día seleccionado */
+.react-calendar__tile--active {
+    background: #ff8c00 !important; /* Fondo naranja */
+    color: white !important;  /* Texto blanco cuando está seleccionado */
+    border-radius: 6px; /* Aumentado */
+}
+
+/* 🔲 Hover sobre los días */
+.react-calendar__tile:hover {
+    background: rgba(0, 33, 71, 0.1); /* Azul oscuro con transparencia */
+}
+
+/* 📩 Mensajes */
+.chat-messages {
+    height: 280px; /* Aumentado */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px; /* Aumentado */
+    border-radius: 8px; /* Aumentado */
+    background: #f5f5f5;
+}
+
+/* 📤 Input del Chat */
+.chat-input {
+    display: flex;
+    gap: 12px; /* Aumentado */
+    margin-top: 12px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 12px; /* Aumentado */
+    border: 1px solid #ccc;
+    border-radius: 6px; /* Aumentado */
+}
+
+.chat-input button {
+    background: #28a745; /* Verde para botones de enviar */
+    color: white;
+    padding: 10px 15px; /* Aumentado */
+    border: none;
+    border-radius: 6px; /* Aumentado */
+    cursor: pointer;
+}
+
+.chat-input button:hover {
+    background: #218838;
+}
+
+/* 📌 Selector de Chat */
+.chat-type {
+    display: flex;
+    justify-content: center;
+    gap: 12px; /* Aumentado */
+    margin-bottom: 15px;
+}
+
+.chat-type button {
+    padding: 12px; /* Aumentado */
+    border: none;
+    border-radius: 6px; /* Aumentado */
+    cursor: pointer;
+    background: #28a745; /* Verde */
+    color: white;
+    transition: 0.3s;
+    font-size: 18px; /* Aumentado */
+}
+
+.chat-type button:hover {
+    background: #218838;
+}
+
+/* 📌 Botones */
+button {
+    background-color: #28a745; /* Verde */
+    color: white;
+    padding: 12px 18px; /* Aumentado */
+    border: none;
+    border-radius: 6px; /* Aumentado */
+    font-size: 18px; /* Aumentado */
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* 📌 Inputs */
+input, select, textarea {
+    width: 100%;
+    padding: 12px; /* Aumentado */
+    margin: 12px 0;
+    border: 1px solid #002147; /* Azul Oscuro */
+    border-radius: 6px; /* Aumentado */
+    font-size: 16px; /* Aumentado */
+}
+
+/* 📌 Ajustes Responsivos */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .calendar-container, .chat-container {
+        width: 100%;
+    }
+}
+/* 📌 Estilos del Navbar */
+.navbar {
+    width: 100%;
+    background-color: #002147; /* Azul oscuro */
+    padding: 15px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between; /* 🏗️ Alinea el título a la izquierda y los enlaces a la derecha */
+    align-items: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 📌 Título Solaria */
+.navbar-brand {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.navbar-brand a {
+    color: white;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+/* 📌 Estilos del logo */
+.navbar-brand img.logo {
+    height: 40px; /* Ajusta el tamaño del logo */
+    width: auto;
+    display: block;
+}
+
+
+/* 📌 Enlaces del Navbar */
+.navbar-links {
+    display: flex;
+    gap: 15px;
+}
+
+.navbar-links a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.navbar-links a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+/* 📌 Logo y nombre */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-brand .logo {
+    height: 40px; /* Ajusta el tamaño según necesidad */
+    width: auto;
+}
+
+.brand-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
