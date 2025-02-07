@@ -20,14 +20,14 @@ function AppContent() {
             {location.pathname !== "/login" && <Navbar />}
 
             <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/managegroups" element={<ManageGroups />} />
-                <Route path="/manageevents" element={<ManageEvents />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/documents" element={<Documents />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/manage-users" element={<ManageUsers />} />
-                <Route path="/folders" element={<Folders />} />
+                <Route path="api/" element={<Dashboard />} />
+                <Route path="api/managegroups" element={<ManageGroups />} />
+                <Route path="api/manageevents" element={<ManageEvents />} />
+                <Route path="api/login" element={<Login />} />
+                <Route path="api/documents" element={<Documents />} />
+                <Route path="api/chat" element={<Chat />} />
+                <Route path="api/manage-users" element={<ManageUsers />} />
+                <Route path="api/folders" element={<Folders />} />
             </Routes>
         </div>
     );
