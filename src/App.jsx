@@ -5,10 +5,9 @@ import Documents from "./pages/Documents";
 import Chat from "./components/Chat";
 import ManageUsers from "./pages/ManageUsers";
 import Folders from "./pages/Folders";
-import Login from "./pages/Login"; 
+import Login from "./pages/Login";
 import ManageGroups from "./pages/ManageGroups";
-import ManageEvents from "./pages/ManageEvents"
-
+import ManageEvents from "./pages/ManageEvents";
 
 // 📌 Componente principal con lógica para ocultar el Navbar en /login
 function AppContent() {
@@ -21,13 +20,13 @@ function AppContent() {
 
             <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/api/managegroups" element={<ManageGroups />} />
-                <Route path="/api/manageevents" element={<ManageEvents />} />
-                <Route path="/api/login" element={<Login />} />
-                <Route path="/api/documents" element={<Documents />} />
-                <Route path="/api/chat" element={<Chat />} />
-                <Route path="/api/manage-users" element={<ManageUsers />} />
-                <Route path="/api/folders" element={<Folders />} />
+                <Route path="/managegroups" element={<ManageGroups />} />
+                <Route path="/manageevents" element={<ManageEvents />} />
+                <Route path="/login" element={<Login />} />  {/* ✅ Ruta corregida */}
+                <Route path="/documents" element={<Documents />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/manage-users" element={<ManageUsers />} />
+                <Route path="/folders" element={<Folders />} />
             </Routes>
         </div>
     );
