@@ -8,7 +8,7 @@ function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const API_URL = "https://integrat360intranet-production.up.railway.app"|| "https://integrat360intranet-production.up.railway.app"; // Asegurar HTTPS
+    const API_URL = import.meta.env.VITE_API_URL|| "https://integrat360intranet-production.up.railway.app"; // Asegurar HTTPS
 
     const handleLogin = async () => {
         try {
