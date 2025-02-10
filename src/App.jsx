@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Navbar from "./components/Navbar"; // ✅ Importación corregida
-import Sidebar from "./components/Sidebar"; // ✅ Importación corregida
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
+import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
-import Chat from "./components/Chat"; // ✅ Verifica si el archivo existe y respeta mayúsculas/minúsculas
+import Chat from "./components/Chat";
 import ManageUsers from "./pages/ManageUsers";
 import Folders from "./pages/Folders";
 import Login from "./pages/Login";
@@ -11,40 +12,31 @@ import ManageGroups from "./pages/ManageGroups";
 import ManageEvents from "./pages/ManageEvents";
 import "./styles/estilos-optimizados.css";
 
-
-// 📌 Componente principal con lógica para ocultar Navbar y Sidebar en /login
 function AppContent() {
-    const location = useLocation(); // 📌 Obtiene la ruta actual
-
-    const hideNavbarAndSidebar = location.pathname === "/login";
+    const location = useLocation();
+    const { user } = useContext(AuthContext); // ✅ Obtiene el usuario autenticado
+    const hideSidebar = location.pathname === "/login";
 
     return (
         <div className="app-container">
-            {/* ✅ Muestra Navbar y Sidebar solo si NO estamos en /login */}
-            {!hideNavbarAndSidebar && (
-                <>
-                    <Navbar />
-                    <Sidebar />
-                </>
-            )}
+            {!hideSidebar && user && <Sidebar />}
 
-            <div className={!hideNavbarAndSidebar ? "main-content" : ""}>
+            <div className={!hideSidebar ? "main-content" : ""}>
                 <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/managegroups" element={<ManageGroups />} />
-                    <Route path="/manageevents" element={<ManageEvents />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/documents" element={<Documents />} />
-                    <Route path="/chat" element={<Chat />} />
-                    <Route path="/manage-users" element={<ManageUsers />} />
-                    <Route path="/folders" element={<Folders />} />
+                    <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+                    <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+                    <Route path="/managegroups" element={user ? <ManageGroups /> : <Navigate to="/login" />} />
+                    <Route path="/manageevents" element={user ? <ManageEvents /> : <Navigate to="/login" />} />
+                    <Route path="/documents" element={user ? <Documents /> : <Navigate to="/login" />} />
+                    <Route path="/chat" element={user ? <Chat /> : <Navigate to="/login" />} />
+                    <Route path="/manage-users" element={user ? <ManageUsers /> : <Navigate to="/login" />} />
+                    <Route path="/folders" element={user ? <Folders /> : <Navigate to="/login" />} />
                 </Routes>
             </div>
         </div>
     );
 }
 
-// 📌 Envuelve `AppContent` en `Router`
 function App() {
     return (
         <Router>

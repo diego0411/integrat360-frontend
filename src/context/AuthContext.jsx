@@ -1,40 +1,35 @@
 import { createContext, useState, useEffect } from "react";
-import axios from "axios";
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            setLoading(false);
-            return;
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
         }
-
-        axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(res => {
-            setUser(res.data);
-            console.log("Usuario autenticado:", res.data);
-        })
-        .catch(() => {
-            console.error("Token inválido o expirado");
-            localStorage.removeItem("token");
-            setUser(null);
-        })
-        .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <p>Cargando...</p>;
+    // 📌 Función para iniciar sesión
+    const login = (userData, token) => {
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("token", token);
+    };
+
+    // 📌 Función para cerrar sesión
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        window.location.href = "/login"; // Redirige al login
+    };
 
     return (
-        <AuthContext.Provider value={{ user, setUser }}>
+        <AuthContext.Provider value={{ user, setUser, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
-};
+}
