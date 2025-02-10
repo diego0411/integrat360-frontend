@@ -137,10 +137,4 @@ input, select, textarea {
         margin-left: 220px;
     }
 }
-bbody {
-    background-image: url('/fondoS.jpg'); /* ✅ Sin "public" */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-}
+
