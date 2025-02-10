@@ -137,4 +137,11 @@ input, select, textarea {
         margin-left: 220px;
     }
 }
+body {
+    background-image: url('/solariaF.jpg'); /* ✅ Cambia el nombre */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
 

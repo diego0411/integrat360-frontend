@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import "../styles/Dashboard.css"
+import "/src/styles/Dashboard.css";  // ✅ Forza la ruta absoluta
 
 
 function Dashboard() {
