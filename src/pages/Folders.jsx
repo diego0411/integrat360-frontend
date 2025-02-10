@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaTrash, FaShare, FaFolder, FaPlus, FaUpload, FaEye, FaDownload } from "react-icons/fa";
 import DocumentViewer from "../components/DocumentViewer";
-import "../styles/Folders.css"
+
 
 function Folders() {
     const [folders, setFolders] = useState({ ownFolders: [], sharedFolders: [] });
