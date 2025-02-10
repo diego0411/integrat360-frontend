@@ -1,24 +1,34 @@
-/* 📁 Documentos Minimalista y Elegante */
 .documents-container {
-    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.documents-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+.file-item {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    padding: 10px;
+    border-radius: 6px;
+    width: 90%;
+    box-shadow: var(--card-shadow);
+    justify-content: space-between;
 }
 
-.documents-table th, .documents-table td {
-    padding: 12px;
-    border: 1px solid #ddd;
-    text-align: left;
+.file-item a {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 600;
 }
 
-.documents-table th {
-    background-color: #1e88e5;
+.file-item button {
+    background: red;
     color: white;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.file-item button:hover {
+    background: darkred;
 }

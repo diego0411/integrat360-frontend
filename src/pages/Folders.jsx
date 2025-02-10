@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaTrash, FaShare } from "react-icons/fa";
+import { FaFolder, FaTrash, FaShare } from "react-icons/fa";
+import "../styles/folders.css";
 
-function Folders() {
+function Folders({ onFolderSelect }) {
     const [folders, setFolders] = useState({ ownFolders: [], sharedFolders: [] });
     const [newFolderName, setNewFolderName] = useState("");
     const [users, setUsers] = useState([]);
@@ -85,60 +86,58 @@ function Folders() {
 
     return (
         <div>
-            <h1>Gestión de Carpetas</h1>
+            <h1>📂 Gestión de Carpetas</h1>
 
-            {/* CREAR CARPETA */}
-            <h2>Crear Nueva Carpeta</h2>
-            <input type="text" placeholder="Nombre de la carpeta" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
-            <button onClick={createFolder}>Crear Carpeta</button>
+            {/* 📌 CREAR CARPETA */}
+            <div className="folder-create">
+                <input 
+                    type="text" 
+                    placeholder="Nombre de la carpeta" 
+                    value={newFolderName} 
+                    onChange={(e) => setNewFolderName(e.target.value)} 
+                />
+                <button onClick={createFolder}>Crear Carpeta</button>
+            </div>
 
-            {/* LISTA DE CARPETAS PROPIAS */}
-            <h2>Carpetas Propias</h2>
-            <ul>
-                {folders.ownFolders.map(folder => (
-                    <li key={folder.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "300px", padding: "5px", borderBottom: "1px solid #ddd" }}>
-                        <span>{folder.name}</span>
-                        <div>
-                            <button onClick={() => deleteFolder(folder.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "red", marginRight: "10px" }}>
+            {/* 📌 LISTA DE CARPETAS PROPIAS Y COMPARTIDAS */}
+            <div className="folders-container">
+                {[...folders.ownFolders, ...folders.sharedFolders].map(folder => (
+                    <div key={folder.id} className="folder-item" onClick={() => onFolderSelect(folder.id)}>
+                        <FaFolder className="folder-icon" />
+                        <span className="folder-name">{folder.name}</span>
+                        <div className="folder-actions">
+                            <button onClick={() => deleteFolder(folder.id)} className="delete-btn">
                                 <FaTrash />
                             </button>
-                            <button onClick={() => setSelectedFolder(folder.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "blue" }}>
+                            <button onClick={() => setSelectedFolder(folder.id)} className="share-btn">
                                 <FaShare />
                             </button>
                         </div>
-                    </li>
+                    </div>
                 ))}
-            </ul>
+            </div>
 
-            {/* LISTA DE CARPETAS COMPARTIDAS */}
-            <h2>Carpetas Compartidas Contigo</h2>
-            <ul>
-                {folders.sharedFolders.map(folder => (
-                    <li key={folder.id} style={{ width: "300px", padding: "5px", borderBottom: "1px solid #ddd" }}>
-                        {folder.name}
-                    </li>
-                ))}
-            </ul>
+            {/* 📌 COMPARTIR CARPETA */}
+            <div className="folder-share">
+                <h2>Compartir Carpeta</h2>
+                <label>Selecciona una Carpeta:</label>
+                <select onChange={(e) => setSelectedFolder(e.target.value)} value={selectedFolder}>
+                    <option value="">Selecciona una carpeta</option>
+                    {folders.ownFolders.map(folder => (
+                        <option key={folder.id} value={folder.id}>{folder.name}</option>
+                    ))}
+                </select>
 
-            {/* COMPARTIR CARPETA */}
-            <h2>Compartir Carpeta</h2>
-            <label>Selecciona una Carpeta:</label>
-            <select onChange={(e) => setSelectedFolder(e.target.value)} value={selectedFolder}>
-                <option value="">Selecciona una carpeta</option>
-                {folders.ownFolders.map(folder => (
-                    <option key={folder.id} value={folder.id}>{folder.name}</option>
-                ))}
-            </select>
+                <label>Selecciona un Usuario:</label>
+                <select onChange={(e) => setSelectedUser(e.target.value)} value={selectedUser}>
+                    <option value="">Selecciona un usuario</option>
+                    {users.map(user => (
+                        <option key={user.id} value={user.id}>{user.name} - {user.email}</option>
+                    ))}
+                </select>
 
-            <label>Selecciona un Usuario:</label>
-            <select onChange={(e) => setSelectedUser(e.target.value)} value={selectedUser}>
-                <option value="">Selecciona un usuario</option>
-                {users.map(user => (
-                    <option key={user.id} value={user.id}>{user.name} - {user.email}</option>
-                ))}
-            </select>
-
-            <button onClick={shareFolder}>Compartir Carpeta</button>
+                <button onClick={shareFolder}>Compartir Carpeta</button>
+            </div>
         </div>
     );
 }

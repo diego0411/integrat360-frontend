@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import "../styles/Dashboard.css";
+
 
 function Dashboard() {
     const [events, setEvents] = useState([]);
@@ -88,57 +90,60 @@ function Dashboard() {
 
     return (
         <div className="dashboard-container">
-            {/* 📆 Calendario */}
-            <div className="calendar-container">
-                <h2>📅 Eventos</h2>
-                <Calendar
-                    onChange={handleDateChange}
-                    value={selectedDate}
-                    tileContent={({ date, view }) => {
-                        if (view === "month") {
-                            const formattedDate = date.toISOString().split("T")[0];
+            <h2 className="dashboard-title">📅 Eventos</h2>
 
-                            // 📌 Verifica si hay eventos en la fecha actual
-                            const hasEvent = events.some(event => event.date === formattedDate);
+            {/* 📌 Contenedor para organizar el calendario y la lista de eventos */}
+            <div className="dashboard-content">
+                
+                {/* 📆 Calendario */}
+                <div className="calendar-container">
+                    <Calendar
+                        onChange={handleDateChange}
+                        value={selectedDate}
+                        tileContent={({ date, view }) => {
+                            if (view === "month") {
+                                const formattedDate = date.toISOString().split("T")[0];
 
-                            return hasEvent ? (
-                                <div className="event-marker" title="Evento">
-                                    🎉
-                                </div>
-                            ) : null;
-                        }
-                    }}
-                />
-            </div>
+                                // 📌 Verifica si hay eventos en la fecha actual
+                                const hasEvent = events.some(event => event.date === formattedDate);
 
-            {/* 📌 Eventos del día seleccionado */}
-            <div className="event-list">
-                <h3>📆 Eventos del {selectedDate.toLocaleDateString()}</h3>
-                {selectedEvents.length === 0 ? (
-                    <p>No hay eventos para este día.</p>
-                ) : (
-                    <ul>
-                        {selectedEvents.map(event => (
-                            <li key={event.id}>
-                                🎉 <strong>{event.title}</strong> - {event.visibility === "public" ? "🌎 Público" : "🔒 Privado"}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
+                                return hasEvent ? (
+                                    <div className="event-marker" title="Evento">
+                                        🎉
+                                    </div>
+                                ) : null;
+                            }
+                        }}
+                    />
+                </div>
 
-            {/* 🎂 Cumpleaños del día seleccionado */}
-            <div className="birthday-container">
-                <h2>🎂 Cumpleaños el {selectedDate.toLocaleDateString()}</h2>
-                {selectedBirthdays.length > 0 ? (
-                    <ul>
-                        {selectedBirthdays.map(user => (
-                            <li key={user.id}>🎉 {user.name || user.full_name}</li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>No hay cumpleaños para esta fecha.</p>
-                )}
+                {/* 📌 Lista de eventos y cumpleaños */}
+                <div className="events-section">
+                    <h3>📆 Eventos del {selectedDate.toLocaleDateString()}</h3>
+                    {selectedEvents.length === 0 ? (
+                        <p>No hay eventos para este día.</p>
+                    ) : (
+                        <ul>
+                            {selectedEvents.map(event => (
+                                <li key={event.id}>
+                                    🎉 <strong>{event.title}</strong> - {event.visibility === "public" ? "🌎 Público" : "🔒 Privado"}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    <h3>🎂 Cumpleaños el {selectedDate.toLocaleDateString()}</h3>
+                    {selectedBirthdays.length > 0 ? (
+                        <ul>
+                            {selectedBirthdays.map(user => (
+                                <li key={user.id}>🎉 {user.name || user.full_name}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No hay cumpleaños para esta fecha.</p>
+                    )}
+                </div>
+
             </div>
         </div>
     );
