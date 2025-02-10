@@ -138,7 +138,7 @@ input, select, textarea {
     }
 }
 body {
-    background-image: url("public/fondo solaria.jpeg");
+    background-image: url("/fondo solaria.jpeg");
     background-size: cover; /* Ajusta la imagen para que cubra toda la pantalla */
     background-position: center; /* Centra la imagen */
     background-attachment: fixed; /* Mantiene la imagen fija al hacer scroll */
