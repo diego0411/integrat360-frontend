@@ -15,7 +15,6 @@ function Folders() {
     const [showShareSection, setShowShareSection] = useState(null);
     const [showUploadSection, setShowUploadSection] = useState(null);
     const [file, setFile] = useState(null);
-    const [selectedFileUrl, setSelectedFileUrl] = useState("");
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -98,7 +97,8 @@ function Folders() {
                     { folderId: showShareSection, userId: selectedUser }, 
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
-            } else if (selectedGroup) {
+            } 
+            if (selectedGroup) {
                 await axios.post(`${import.meta.env.VITE_API_URL}/folders/share/group`, 
                     { folderId: showShareSection, groupId: selectedGroup }, 
                     { headers: { Authorization: `Bearer ${token}` } }
@@ -108,21 +108,10 @@ function Folders() {
             alert("✅ Carpeta compartida exitosamente");
             fetchFolders();
             setShowShareSection(null);
+            setSelectedUser(""); // Resetear usuario seleccionado
+            setSelectedGroup(""); // Resetear grupo seleccionado
         } catch (error) {
             console.error("❌ Error al compartir la carpeta:", error);
-        }
-    };
-
-    const openFolder = async (folderId) => {
-        try {
-            const token = localStorage.getItem("token");
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/documents/${folderId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setSelectedFolder(folderId);
-            setDocuments(res.data);
-        } catch (error) {
-            console.error("❌ Error al abrir la carpeta:", error);
         }
     };
 
@@ -145,7 +134,7 @@ function Folders() {
             alert("✅ Archivo subido correctamente");
             setFile(null);
             setShowUploadSection(null);
-            openFolder(showUploadSection);
+            fetchFolders();
         } catch (error) {
             console.error("❌ Error al subir el archivo:", error);
         }
@@ -171,14 +160,14 @@ function Folders() {
                 {loading ? <p>Cargando carpetas...</p> : (
                     folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) => (
                         <div key={`${folder.id}-${index}`} className="folder-card">
-                            <div onClick={() => openFolder(folder.id)}>
+                            <div onClick={() => setShowShareSection(folder.id)}>
                                 <FaFolder className="folder-icon" />
                                 <p className="folder-name">{folder.name}</p>
                             </div>
                             <div className="folder-actions">
                                 <FaUpload className="upload-icon" onClick={() => setShowUploadSection(folder.id)} />
                                 <FaShare className="share-icon" onClick={() => setShowShareSection(folder.id)} />
-                                <FaTrash className="delete-icon" onClick={() => deleteFolder(folder.id)} />
+                                <FaTrash className="delete-icon" />
                             </div>
                         </div>
                     ))
@@ -195,14 +184,27 @@ function Folders() {
                 </div>
             )}
 
-            {/* 📌 Compartir carpeta */}
+            {/* 📌 Compartir carpeta con usuario o grupo */}
             {showShareSection && (
                 <div className="share-section">
                     <h2>📤 Compartir Carpeta</h2>
+
+                    <label>Selecciona un usuario:</label>
                     <select onChange={(e) => setSelectedUser(e.target.value)} value={selectedUser}>
                         <option value="">Selecciona un usuario</option>
-                        {users.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}
+                        {users.map(user => (
+                            <option key={user.id} value={user.id}>{user.name}</option>
+                        ))}
                     </select>
+
+                    <label>Selecciona un grupo:</label>
+                    <select onChange={(e) => setSelectedGroup(e.target.value)} value={selectedGroup}>
+                        <option value="">Selecciona un grupo</option>
+                        {groups.map(group => (
+                            <option key={group.id} value={group.id}>{group.name}</option>
+                        ))}
+                    </select>
+
                     <button onClick={shareFolder}>Compartir</button>
                     <button onClick={() => setShowShareSection(null)}>Cancelar</button>
                 </div>
