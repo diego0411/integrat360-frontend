@@ -3,9 +3,6 @@ import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-
-
-
 function Dashboard() {
     const [events, setEvents] = useState([]);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -70,23 +67,43 @@ function Dashboard() {
         }
     };
 
-    // 📌 Manejar selección de fecha
+    // 📌 Obtener el rango de fechas de la semana actual
+    const getWeekRange = (date) => {
+        const start = new Date(date);
+        start.setDate(start.getDate() - start.getDay()); // Inicio de la semana (domingo)
+
+        const end = new Date(start);
+        end.setDate(end.getDate() + 6); // Fin de la semana (sábado)
+
+        return { start, end };
+    };
+
+    // 📌 Manejar selección de fecha para mostrar eventos de la semana
     const handleDateChange = (date) => {
-        const formattedDate = date.toISOString().split("T")[0]; // 📆 Convertir fecha seleccionada a "YYYY-MM-DD"
-        const formattedMonthDay = formattedDate.slice(5, 10); // 📆 Extraer solo "MM-DD"
         setSelectedDate(date);
+        const { start, end } = getWeekRange(date);
 
-        console.log(`📆 Fecha seleccionada: ${formattedDate}`);
+        console.log(`📆 Semana seleccionada: ${start.toISOString().split("T")[0]} - ${end.toISOString().split("T")[0]}`);
 
-        // 📌 Filtrar eventos para la fecha seleccionada
-        const filteredEvents = events.filter(event => event.date === formattedDate);
+        // 📌 Filtrar eventos dentro de la semana
+        const filteredEvents = events.filter(event => {
+            const eventDate = new Date(event.date);
+            return eventDate >= start && eventDate <= end;
+        });
+
         setSelectedEvents(filteredEvents);
 
-        // 📌 Filtrar cumpleaños para la fecha seleccionada (comparando solo "MM-DD")
-        const filteredBirthdays = birthdays.filter(user => user.birthdate === formattedMonthDay);
+        // 📌 Filtrar cumpleaños en la semana (comparando solo "MM-DD")
+        const startMonthDay = start.toISOString().slice(5, 10);
+        const endMonthDay = end.toISOString().slice(5, 10);
+        const filteredBirthdays = birthdays.filter(user => {
+            const userBirthMonthDay = user.birthdate;
+            return userBirthMonthDay >= startMonthDay && userBirthMonthDay <= endMonthDay;
+        });
+
         setSelectedBirthdays(filteredBirthdays);
 
-        console.log("🎂 Cumpleaños en la fecha seleccionada:", filteredBirthdays);
+        console.log("🎂 Cumpleaños en la semana seleccionada:", filteredBirthdays);
     };
 
     return (
@@ -118,11 +135,11 @@ function Dashboard() {
                     />
                 </div>
 
-                {/* 📌 Lista de eventos y cumpleaños */}
+                {/* 📌 Lista de eventos y cumpleaños de la semana */}
                 <div className="events-section">
-                    <h3>📆 Eventos del {selectedDate.toLocaleDateString()}</h3>
+                    <h3>📆 Eventos de la semana</h3>
                     {selectedEvents.length === 0 ? (
-                        <p>No hay eventos para este día.</p>
+                        <p>No hay eventos para esta semana.</p>
                     ) : (
                         <ul>
                             {selectedEvents.map(event => (
@@ -133,7 +150,7 @@ function Dashboard() {
                         </ul>
                     )}
 
-                    <h3>🎂 Cumpleaños el {selectedDate.toLocaleDateString()}</h3>
+                    <h3>🎂 Cumpleaños de la semana</h3>
                     {selectedBirthdays.length > 0 ? (
                         <ul>
                             {selectedBirthdays.map(user => (
@@ -141,7 +158,7 @@ function Dashboard() {
                             ))}
                         </ul>
                     ) : (
-                        <p>No hay cumpleaños para esta fecha.</p>
+                        <p>No hay cumpleaños para esta semana.</p>
                     )}
                 </div>
 

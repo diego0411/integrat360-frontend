@@ -5,12 +5,13 @@ import axios from "axios";
 function Chat() {
     const { user } = useContext(AuthContext);
     const [selectedChat, setSelectedChat] = useState("public");
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([]); // ✅ Evita errores con .map()
     const [message, setMessage] = useState("");
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("");
+    const [error, setError] = useState(null); // ✅ Manejo de errores
 
     useEffect(() => {
         fetchUsers();
@@ -22,45 +23,54 @@ function Chat() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem("token");
+            if (!token) {
+                console.warn("⚠️ No hay token de autenticación.");
+                return;
+            }
+
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(res.data);
+
+            setUsers(res.data || []);
+            console.log("👤 Usuarios obtenidos:", res.data);
         } catch (error) {
             console.error("❌ Error al obtener usuarios:", error);
+            setError("No se pudieron cargar los usuarios.");
         }
     };
 
-    // 📌 Obtener grupos
+    // 📌 Obtener lista de grupos
     const fetchGroups = async () => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            console.warn("⚠️ No hay token de autenticación.");
-            return;
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                console.warn("⚠️ No hay token de autenticación.");
+                return;
+            }
+
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/groups`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setGroups(res.data || []);
+            console.log("👥 Grupos obtenidos:", res.data);
+        } catch (error) {
+            console.error("❌ Error al obtener grupos:", error);
+            setError("No se pudieron cargar los grupos.");
         }
-
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/groups`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (!response.data || response.data.length === 0) {
-            console.warn("⚠️ No hay grupos disponibles.");
-            setGroups([]);
-            return;
-        }
-
-        console.log("📌 Grupos obtenidos:", response.data);
-        setGroups(response.data);
-    } catch (error) {
-        console.error("❌ Error al obtener grupos:", error.response?.data || error.message);
-    }
-};
+    };
 
     // 📌 Obtener mensajes según el tipo de chat
     const fetchMessages = async () => {
         try {
+            setError(null);
             const token = localStorage.getItem("token");
+            if (!token) {
+                console.warn("⚠️ No hay token de autenticación.");
+                return;
+            }
+
             let url = `${import.meta.env.VITE_API_URL}/chat/public`;
             if (selectedChat === "private" && selectedUser) {
                 url = `${import.meta.env.VITE_API_URL}/chat/private/${selectedUser}`;
@@ -68,44 +78,64 @@ function Chat() {
                 url = `${import.meta.env.VITE_API_URL}/chat/group/${selectedGroup}`;
             }
 
-            const res = await axios.get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            console.log(`📢 Obteniendo mensajes desde: ${url}`);
+            const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
 
-            setMessages(res.data);
+            setMessages(res.data || []);
+            console.log("📩 Mensajes recibidos:", res.data);
         } catch (error) {
             console.error("❌ Error al obtener mensajes:", error);
+            setError("No se pudieron cargar los mensajes.");
         }
     };
 
     // 📌 Enviar mensaje
     const sendMessage = async () => {
-        if (!message.trim()) return;
+        if (!message.trim()) return alert("⚠️ El mensaje no puede estar vacío.");
 
         try {
+            setError(null);
             const token = localStorage.getItem("token");
+            if (!token) {
+                console.warn("⚠️ No hay token de autenticación.");
+                return;
+            }
+
             const data = { message };
 
             if (selectedChat === "private") {
+                if (!selectedUser) {
+                    return alert("⚠️ Debes seleccionar un usuario.");
+                }
                 data.receiver_id = selectedUser;
             } else if (selectedChat === "group") {
+                if (!selectedGroup) {
+                    return alert("⚠️ Debes seleccionar un grupo.");
+                }
                 data.group_id = selectedGroup;
             }
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/chat`, data, {
+            console.log("📩 Enviando mensaje con datos:", data);
+
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/chat`, data, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
+            console.log("✅ Mensaje enviado con éxito:", res.data);
             setMessage("");
             fetchMessages();
         } catch (error) {
-            console.error("❌ Error al enviar mensaje:", error);
+            console.error("❌ Error al enviar mensaje:", error.response?.data || error.message);
+            setError("No se pudo enviar el mensaje. Intenta nuevamente.");
         }
     };
 
     return (
         <div className="chat-container">
             <h1>💬 Chat Interno</h1>
+
+            {/* 📌 Mostrar errores en UI */}
+            {error && <p className="error-message">{error}</p>}
 
             {/* 📌 Selector de tipo de chat */}
             <div className="chat-type">
