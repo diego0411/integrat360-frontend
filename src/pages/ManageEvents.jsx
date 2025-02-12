@@ -7,6 +7,8 @@ function ManageEvents() {
     const [description, setDescription] = useState("");
     const [date, setDate] = useState("");
     const [visibility, setVisibility] = useState("public");
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         fetchEvents();
@@ -22,6 +24,7 @@ function ManageEvents() {
             setEvents(res.data);
             console.log("📅 Eventos cargados:", res.data);
         } catch (error) {
+            setErrorMessage("❌ Error al obtener eventos.");
             console.error("❌ Error al obtener eventos:", error);
         }
     };
@@ -33,14 +36,15 @@ function ManageEvents() {
             return;
         }
 
-        const eventData = {
-            title,
-            description,
-            date,
-            visibility,
-        };
+        if (new Date(date) < new Date()) {
+            alert("La fecha del evento debe ser posterior a la fecha actual.");
+            return;
+        }
+
+        const eventData = { title, description, date, visibility };
 
         try {
+            setLoading(true);
             const token = localStorage.getItem("token");
             await axios.post(`${import.meta.env.VITE_API_URL}/events`, eventData, {
                 headers: {
@@ -48,7 +52,6 @@ function ManageEvents() {
                     "Content-Type": "application/json"
                 }
             });
-
             console.log("✅ Evento creado correctamente");
             setTitle("");
             setDescription("");
@@ -56,7 +59,10 @@ function ManageEvents() {
             setVisibility("public");
             fetchEvents();
         } catch (error) {
+            setErrorMessage("❌ Error al guardar evento.");
             console.error("❌ Error al guardar evento:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -65,15 +71,18 @@ function ManageEvents() {
         if (!window.confirm("¿Seguro que deseas eliminar este evento?")) return;
 
         try {
+            setLoading(true);
             const token = localStorage.getItem("token");
             await axios.delete(`${import.meta.env.VITE_API_URL}/events/${eventId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
             console.log("🗑️ Evento eliminado correctamente");
             fetchEvents();
         } catch (error) {
+            setErrorMessage("❌ Error al eliminar el evento.");
             console.error("❌ Error al eliminar el evento:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -81,16 +90,35 @@ function ManageEvents() {
         <div className="container">
             <h1>📅 Gestión de Eventos</h1>
 
+            {/* 📌 Mensaje de error */}
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
+
             {/* 📌 Formulario para agregar eventos */}
             <div className="event-form">
-                <input type="text" placeholder="Título del evento" value={title} onChange={(e) => setTitle(e.target.value)} />
-                <input type="text" placeholder="Descripción (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} />
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                <input
+                    type="text"
+                    placeholder="Título del evento"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Descripción (opcional)"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                />
+                <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                />
                 <select value={visibility} onChange={(e) => setVisibility(e.target.value)}>
                     <option value="public">Público</option>
                     <option value="private">Privado</option>
                 </select>
-                <button onClick={handleSaveEvent}>➕ Agregar Evento</button>
+                <button onClick={handleSaveEvent} disabled={loading}>
+                    {loading ? "Cargando..." : "➕ Agregar Evento"}
+                </button>
             </div>
 
             {/* 📌 Lista de eventos */}
@@ -103,7 +131,9 @@ function ManageEvents() {
                         <li key={event.id}>
                             <strong>{event.title}</strong> - {event.date} [{event.visibility}]
                             <p>{event.description}</p>
-                            <button onClick={() => handleDeleteEvent(event.id)}>🗑️ Eliminar</button>
+                            <button onClick={() => handleDeleteEvent(event.id)} disabled={loading}>
+                                🗑️ Eliminar
+                            </button>
                         </li>
                     ))}
                 </ul>
