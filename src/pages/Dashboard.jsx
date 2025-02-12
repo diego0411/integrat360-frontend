@@ -3,6 +3,7 @@ import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
+
 function Dashboard() {
     const [events, setEvents] = useState([]);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -15,12 +16,9 @@ function Dashboard() {
         fetchBirthdays();
     }, []);
 
-    // 📌 Obtener eventos públicos y privados del usuario autenticado
     const fetchEvents = async () => {
         try {
             const token = localStorage.getItem("token");
-
-            // 🔹 Obtener eventos públicos y eventos del usuario autenticado
             const [publicEvents, userEvents] = await Promise.all([
                 axios.get(`${import.meta.env.VITE_API_URL}/events/public`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -30,23 +28,18 @@ function Dashboard() {
                 })
             ]);
 
-            // 🔹 Combinar ambos eventos en una sola lista
-            const allEvents = [...publicEvents.data, ...userEvents.data];
-
-            // 📌 Convertir fechas a formato "YYYY-MM-DD"
-            const formattedEvents = allEvents.map(event => ({
+            const allEvents = [...publicEvents.data, ...userEvents.data].map(event => ({
                 ...event,
                 date: new Date(event.date).toISOString().split("T")[0]
             }));
 
-            setEvents(formattedEvents);
-            console.log("📅 Eventos públicos y del usuario cargados:", formattedEvents);
+            setEvents(allEvents);
+            console.log("📅 Eventos públicos y del usuario cargados:", allEvents);
         } catch (error) {
             console.error("❌ Error al obtener eventos:", error);
         }
     };
 
-    // 📌 Obtener cumpleaños de TODOS los usuarios
     const fetchBirthdays = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -54,10 +47,9 @@ function Dashboard() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // 📌 Convertir fechas de cumpleaños a formato "MM-DD" para comparación sin el año
             const formattedBirthdays = res.data.map(user => ({
                 ...user,
-                birthdate: new Date(user.birthdate).toISOString().slice(5, 10) // Extrae solo "MM-DD"
+                birthdateFormatted: new Date(user.birthdate).toISOString().split("T")[0]
             }));
 
             setBirthdays(formattedBirthdays);
@@ -67,25 +59,22 @@ function Dashboard() {
         }
     };
 
-    // 📌 Obtener el rango de fechas de la semana actual
     const getWeekRange = (date) => {
         const start = new Date(date);
-        start.setDate(start.getDate() - start.getDay()); // Inicio de la semana (domingo)
+        start.setDate(start.getDate() - start.getDay());
 
         const end = new Date(start);
-        end.setDate(end.getDate() + 6); // Fin de la semana (sábado)
+        end.setDate(end.getDate() + 6);
 
         return { start, end };
     };
 
-    // 📌 Manejar selección de fecha para mostrar eventos de la semana
     const handleDateChange = (date) => {
         setSelectedDate(date);
         const { start, end } = getWeekRange(date);
 
         console.log(`📆 Semana seleccionada: ${start.toISOString().split("T")[0]} - ${end.toISOString().split("T")[0]}`);
 
-        // 📌 Filtrar eventos dentro de la semana
         const filteredEvents = events.filter(event => {
             const eventDate = new Date(event.date);
             return eventDate >= start && eventDate <= end;
@@ -93,11 +82,10 @@ function Dashboard() {
 
         setSelectedEvents(filteredEvents);
 
-        // 📌 Filtrar cumpleaños en la semana (comparando solo "MM-DD")
         const startMonthDay = start.toISOString().slice(5, 10);
         const endMonthDay = end.toISOString().slice(5, 10);
         const filteredBirthdays = birthdays.filter(user => {
-            const userBirthMonthDay = user.birthdate;
+            const userBirthMonthDay = user.birthdateFormatted.slice(5, 10);
             return userBirthMonthDay >= startMonthDay && userBirthMonthDay <= endMonthDay;
         });
 
@@ -110,10 +98,7 @@ function Dashboard() {
         <div className="dashboard-container">
             <h2 className="dashboard-title">📅 Eventos</h2>
 
-            {/* 📌 Contenedor para organizar el calendario y la lista de eventos */}
             <div className="dashboard-content">
-                
-                {/* 📆 Calendario */}
                 <div className="calendar-container">
                     <Calendar
                         onChange={handleDateChange}
@@ -121,47 +106,28 @@ function Dashboard() {
                         tileContent={({ date, view }) => {
                             if (view === "month") {
                                 const formattedDate = date.toISOString().split("T")[0];
-
-                                // 📌 Verifica si hay eventos en la fecha actual
                                 const hasEvent = events.some(event => event.date === formattedDate);
-
-                                return hasEvent ? (
-                                    <div className="event-marker" title="Evento">
-                                        🎉
-                                    </div>
-                                ) : null;
+                                return hasEvent ? <div className="event-marker">🎉</div> : null;
                             }
                         }}
                     />
                 </div>
 
-                {/* 📌 Lista de eventos y cumpleaños de la semana */}
                 <div className="events-section">
                     <h3>📆 Eventos de la semana</h3>
-                    {selectedEvents.length === 0 ? (
-                        <p>No hay eventos para esta semana.</p>
-                    ) : (
-                        <ul>
-                            {selectedEvents.map(event => (
-                                <li key={event.id}>
-                                    🎉 <strong>{event.title}</strong> - {event.visibility === "public" ? "🌎 Público" : "🔒 Privado"}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                    <ul>
+                        {selectedEvents.map(event => (
+                            <li key={event.id}>🎉 <strong>{event.title}</strong></li>
+                        ))}
+                    </ul>
 
                     <h3>🎂 Cumpleaños de la semana</h3>
-                    {selectedBirthdays.length > 0 ? (
-                        <ul>
-                            {selectedBirthdays.map(user => (
-                                <li key={user.id}>🎉 {user.name || user.full_name}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No hay cumpleaños para esta semana.</p>
-                    )}
+                    <ul>
+                        {selectedBirthdays.map(user => (
+                            <li key={user.id}>🎉 {user.name} - {user.birthdateFormatted}</li>
+                        ))}
+                    </ul>
                 </div>
-
             </div>
         </div>
     );

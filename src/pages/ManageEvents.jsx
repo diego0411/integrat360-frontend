@@ -98,7 +98,7 @@ function ManageEvents() {
             {events.length === 0 ? (
                 <p>No hay eventos disponibles.</p>
             ) : (
-                <ul className="event-list">
+                <ul className="chat-messages">
                     {events.map(event => (
                         <li key={event.id}>
                             <strong>{event.title}</strong> - {event.date} [{event.visibility}]
