@@ -10,7 +10,9 @@ import Folders from "./pages/Folders";
 import Login from "./pages/Login";
 import ManageGroups from "./pages/ManageGroups";
 import ManageEvents from "./pages/ManageEvents";
+import FolderContents from "./pages/FolderContents"
 import "./styles/estilos-optimizados.css";
+
 
 function AppContent() {
     const location = useLocation();
@@ -25,6 +27,7 @@ function AppContent() {
                 <Routes>
                     <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
                     <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+                    <Route path="/folder/:folderId" element={user ? <FolderContents /> : <Navigate to="/login" />} />
                     <Route path="/managegroups" element={user ? <ManageGroups /> : <Navigate to="/login" />} />
                     <Route path="/manageevents" element={user ? <ManageEvents /> : <Navigate to="/login" />} />
                     <Route path="/documents" element={user ? <Documents /> : <Navigate to="/login" />} />

@@ -349,6 +349,7 @@ input, select, textarea {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     }
 }
+
 body {
     background-image: url('/solariaF.jpg'); /* ✅ Cambia el nombre */
     background-size: cover;

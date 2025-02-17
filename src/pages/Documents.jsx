@@ -6,6 +6,8 @@ function Documents() {
     const [file, setFile] = useState(null);
     const [folders, setFolders] = useState([]);
     const [folderId, setFolderId] = useState("");
+    const downloadUrl = `${import.meta.env.VITE_API_URL}/documents/download/${doc.id}`;
+
 
     useEffect(() => {
         fetchFolders();

@@ -51,52 +51,59 @@ function Chat() {
             setError(null);
             const token = localStorage.getItem("token");
             if (!token) return;
-
+    
             let url = `${import.meta.env.VITE_API_URL}/chat/public`;
             if (selectedChat === "private" && selectedUser) {
                 url = `${import.meta.env.VITE_API_URL}/chat/private/${selectedUser}`;
-            } else if (selectedChat === "group" && selectedGroup) {
+            } else if (selectedChat === "group") {
+                if (!selectedGroup) {
+                    console.error("⚠️ No se ha seleccionado un grupo.");
+                    return;
+                }
                 url = `${import.meta.env.VITE_API_URL}/chat/group/${selectedGroup}`;
             }
-
+    
             console.log(`📢 Obteniendo mensajes desde: ${url}`);
             const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-
+    
             if (!res.data || !Array.isArray(res.data)) {
                 console.error("❌ Respuesta inválida:", res.data);
                 setError("Error al obtener mensajes.");
                 return;
             }
-
-            setMessages(res.data.flat()); // ✅ Asegura que sea un array limpio
+    
+            setMessages(res.data.flat());
             console.log("📩 Mensajes recibidos:", res.data);
         } catch (error) {
             console.error("❌ Error al obtener mensajes:", error);
             setError("No se pudieron cargar los mensajes.");
         }
     };
+    
 
     const sendMessage = async () => {
         if (!message.trim()) return alert("⚠️ El mensaje no puede estar vacío.");
-
+    
         try {
             setError(null);
             const token = localStorage.getItem("token");
             if (!token) return;
-
-            const data = { message };
+    
+            // 📌 Definir la estructura correcta para la API
+            const data = { message, receiver_id: null, group_id: null };
+    
             if (selectedChat === "private" && selectedUser) {
                 data.receiver_id = selectedUser;
             } else if (selectedChat === "group" && selectedGroup) {
                 data.group_id = selectedGroup;
             }
-
+    
             console.log("📩 Enviando mensaje:", data);
-
+    
             await axios.post(`${import.meta.env.VITE_API_URL}/chat`, data, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
+    
             setMessage("");
             setTimeout(fetchMessages, 1000);
         } catch (error) {
@@ -104,6 +111,7 @@ function Chat() {
             setError("No se pudo enviar el mensaje.");
         }
     };
+    
 
     return (
         <div className="chat-container">

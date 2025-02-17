@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaTrash, FaShare, FaFolder, FaPlus, FaUpload, FaEye, FaDownload } from "react-icons/fa";
 import DocumentViewer from "../components/DocumentViewer";
+import { useNavigate } from "react-router-dom";
 
 function Folders() {
+    const navigate = useNavigate();
     const [folders, setFolders] = useState({ ownFolders: [], sharedFolders: [], sharedGroupFolders: [] });
     const [newFolderName, setNewFolderName] = useState("");
     const [users, setUsers] = useState([]);
@@ -116,29 +118,41 @@ function Folders() {
     };
 
     const handleFileUpload = async () => {
-        if (!file) return alert("⚠️ Selecciona un archivo");
-
+        if (!file || !showUploadSection) {
+            return alert("⚠️ Selecciona un archivo y una carpeta antes de subir.");
+        }
+    
+        const folderId = Number(showUploadSection);
+        if (isNaN(folderId)) {
+            return alert("⚠️ El ID de la carpeta no es válido.");
+        }
+    
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("folder_id", showUploadSection);
-
+        formData.append("folder_id", folderId);
+    
         try {
             const token = localStorage.getItem("token");
-            await axios.post(`${import.meta.env.VITE_API_URL}/documents/`, formData, {
+            console.log("📤 Subiendo archivo:", file.name, "📂 Carpeta ID:", folderId);
+    
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/documents/`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data"
                 }
             });
-
-            alert("✅ Archivo subido correctamente");
+    
+            console.log("✅ Archivo subido correctamente:", res.data);
             setFile(null);
             setShowUploadSection(null);
             fetchFolders();
         } catch (error) {
-            console.error("❌ Error al subir el archivo:", error);
+            console.error("❌ Error al subir el archivo:", error.response?.data || error.message);
+            alert("❌ Error al subir el archivo. Revisa la consola para más detalles.");
         }
     };
+    
+    
 
     return (
         <div className="folders-container">
@@ -160,7 +174,10 @@ function Folders() {
                 {loading ? <p>Cargando carpetas...</p> : (
                     folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) => (
                         <div key={`${folder.id}-${index}`} className="folder-card">
-                            <div onClick={() => setShowShareSection(folder.id)}>
+                            <div  key={`${folder.id}-${index}`} 
+                className="folder-card"
+                onClick={() => navigate(`/folder/${folder.id}`)} // 👈 Navegar al contenido de la carpeta
+            >
                                 <FaFolder className="folder-icon" />
                                 <p className="folder-name">{folder.name}</p>
                             </div>
