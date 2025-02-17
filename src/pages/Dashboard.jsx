@@ -47,24 +47,27 @@ function Dashboard() {
     // 📌 Obtener cumpleaños
     const fetchBirthdays = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/birthdays");
-            const data = await response.json();
-    
-            // 🔹 Verifica si cada fecha es válida antes de procesarla
-            const formattedBirthdays = data.map((person) => {
-                const date = new Date(person.birthday);
-                if (isNaN(date.getTime())) {
-                    console.warn(`⚠️ Fecha inválida para ${person.name}: ${person.birthday}`);
-                    return { ...person, formattedBirthday: "Fecha no válida" };
-                }
-                return { ...person, formattedBirthday: date.toISOString().split("T")[0] };
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/birthdays`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
-    
+
+            // Formateamos las fechas de cumpleaños
+            const formattedBirthdays = res.data.map(user => {
+                const formattedDate = new Date(user.birthdate);
+                return {
+                    ...user,
+                    birthdateFormatted: formattedDate.toISOString().split("T")[0]
+                };
+            });
+
             setBirthdays(formattedBirthdays);
+            console.log("🎂 Cumpleaños cargados:", formattedBirthdays);
         } catch (error) {
             console.error("❌ Error al obtener cumpleaños:", error);
         }
     };
+
     // 📌 Calcular el rango de la semana para filtrar eventos y cumpleaños
     const getWeekRange = (date) => {
         const start = new Date(date);

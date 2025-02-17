@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaTrash, FaShare, FaFolder, FaPlus, FaUpload } from "react-icons/fa";
+import { FaTrash, FaShare, FaFolder, FaPlus, FaUpload, FaEye, FaDownload } from "react-icons/fa";
 import DocumentViewer from "../components/DocumentViewer";
 
 function Folders() {
@@ -8,6 +8,10 @@ function Folders() {
     const [newFolderName, setNewFolderName] = useState("");
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
+    const [selectedFolder, setSelectedFolder] = useState(null);
+    const [documents, setDocuments] = useState([]);
+    const [selectedUser, setSelectedUser] = useState("");
+    const [selectedGroup, setSelectedGroup] = useState("");
     const [showShareSection, setShowShareSection] = useState(null);
     const [showUploadSection, setShowUploadSection] = useState(null);
     const [file, setFile] = useState(null);
@@ -41,7 +45,10 @@ function Folders() {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setUsers(res.data || []);
+
+            if (res.status === 200) {
+                setUsers(res.data || []);
+            }
         } catch (error) {
             console.error("❌ Error al obtener usuarios:", error);
         }
@@ -53,7 +60,10 @@ function Folders() {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/groups`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setGroups(res.data || []);
+
+            if (res.status === 200) {
+                setGroups(res.data || []);
+            }
         } catch (error) {
             console.error("❌ Error al obtener grupos:", error);
         }
@@ -75,6 +85,61 @@ function Folders() {
         }
     };
 
+    const shareFolder = async () => {
+        if (!showShareSection || (!selectedUser && !selectedGroup)) {
+            return alert("⚠️ Selecciona un usuario o un grupo para compartir");
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            if (selectedUser) {
+                await axios.post(`${import.meta.env.VITE_API_URL}/folders/share`, 
+                    { folderId: showShareSection, userId: selectedUser }, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            } 
+            if (selectedGroup) {
+                await axios.post(`${import.meta.env.VITE_API_URL}/folders/share/group`, 
+                    { folderId: showShareSection, groupId: selectedGroup }, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            }
+
+            alert("✅ Carpeta compartida exitosamente");
+            fetchFolders();
+            setShowShareSection(null);
+            setSelectedUser(""); // Resetear usuario seleccionado
+            setSelectedGroup(""); // Resetear grupo seleccionado
+        } catch (error) {
+            console.error("❌ Error al compartir la carpeta:", error);
+        }
+    };
+
+    const handleFileUpload = async () => {
+        if (!file) return alert("⚠️ Selecciona un archivo");
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder_id", showUploadSection);
+
+        try {
+            const token = localStorage.getItem("token");
+            await axios.post(`${import.meta.env.VITE_API_URL}/documents/`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+
+            alert("✅ Archivo subido correctamente");
+            setFile(null);
+            setShowUploadSection(null);
+            fetchFolders();
+        } catch (error) {
+            console.error("❌ Error al subir el archivo:", error);
+        }
+    };
+
     return (
         <div className="folders-container">
             <h1>📂 Gestión de Carpetas</h1>
@@ -93,22 +158,57 @@ function Folders() {
 
             <div className="folders-grid">
                 {loading ? <p>Cargando carpetas...</p> : (
-                    [...(folders.ownFolders || []), ...(folders.sharedFolders || []), ...(folders.sharedGroupFolders || [])]
-                        .map((folder, index) => (
-                            <div key={`${folder.id}-${index}`} className="folder-card">
-                                <div onClick={() => setShowShareSection(folder.id)}>
-                                    <FaFolder className="folder-icon" />
-                                    <p className="folder-name">{folder.name}</p>
-                                </div>
-                                <div className="folder-actions">
-                                    <FaUpload className="upload-icon" onClick={() => setShowUploadSection(folder.id)} />
-                                    <FaShare className="share-icon" onClick={() => setShowShareSection(folder.id)} />
-                                    <FaTrash className="delete-icon" />
-                                </div>
+                    folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) => (
+                        <div key={`${folder.id}-${index}`} className="folder-card">
+                            <div onClick={() => setShowShareSection(folder.id)}>
+                                <FaFolder className="folder-icon" />
+                                <p className="folder-name">{folder.name}</p>
                             </div>
-                        ))
+                            <div className="folder-actions">
+                                <FaUpload className="upload-icon" onClick={() => setShowUploadSection(folder.id)} />
+                                <FaShare className="share-icon" onClick={() => setShowShareSection(folder.id)} />
+                                <FaTrash className="delete-icon" />
+                            </div>
+                        </div>
+                    ))
                 )}
             </div>
+
+            {/* 📌 Sección de subida de archivos */}
+            {showUploadSection && (
+                <div className="upload-section">
+                    <h2>📤 Subir Archivo</h2>
+                    <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+                    <button onClick={handleFileUpload}>Subir</button>
+                    <button onClick={() => setShowUploadSection(null)}>Cancelar</button>
+                </div>
+            )}
+
+            {/* 📌 Compartir carpeta con usuario o grupo */}
+            {showShareSection && (
+                <div className="share-section">
+                    <h2>📤 Compartir Carpeta</h2>
+
+                    <label>Selecciona un usuario:</label>
+                    <select onChange={(e) => setSelectedUser(e.target.value)} value={selectedUser}>
+                        <option value="">Selecciona un usuario</option>
+                        {users.map(user => (
+                            <option key={user.id} value={user.id}>{user.name}</option>
+                        ))}
+                    </select>
+
+                    <label>Selecciona un grupo:</label>
+                    <select onChange={(e) => setSelectedGroup(e.target.value)} value={selectedGroup}>
+                        <option value="">Selecciona un grupo</option>
+                        {groups.map(group => (
+                            <option key={group.id} value={group.id}>{group.name}</option>
+                        ))}
+                    </select>
+
+                    <button onClick={shareFolder}>Compartir</button>
+                    <button onClick={() => setShowShareSection(null)}>Cancelar</button>
+                </div>
+            )}
         </div>
     );
 }
