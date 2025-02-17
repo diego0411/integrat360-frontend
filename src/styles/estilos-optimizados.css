@@ -356,3 +356,65 @@ body {
     background-attachment: fixed;
     background-repeat: no-repeat;
 }
+
+/* 📂 Contenedor de carpetas en columnas */
+.folders-grid {
+    display: flex; /* 🟢 Cambiamos a flexbox */
+    flex-direction: row; /* 🟢 Asegura alineación horizontal */
+    gap: 20px;
+    overflow-x: auto; /* 🔥 Permite desplazamiento horizontal si hay muchas columnas */
+    padding: 10px 0;
+    white-space: nowrap;
+}
+
+/* 📌 Cada nivel de carpetas tendrá su propia columna */
+.folder-content {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    min-width: 250px; /* 🔥 Asegura que cada columna tenga un tamaño suficiente */
+    max-width: 300px;
+}
+
+/* 📌 Cada carpeta se muestra como un elemento individual */
+.folder-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+/* 📌 Ajustes para los íconos de carpetas y archivos */
+.folder-icon {
+    font-size: 20px;
+    color: #007bff;
+}
+
+.upload-icon {
+    font-size: 16px;
+    color: #28a745;
+    cursor: pointer;
+}
+
+/* 📂 Columnas dinámicas para mostrar carpetas seleccionadas */
+.folder-trail {
+    display: flex;
+    flex-direction: row; /* 📌 Asegura que se expandan a la derecha */
+    gap: 15px;
+    overflow-x: auto; /* 🔥 Permite desplazamiento horizontal */
+    padding: 10px;
+}
+
+/* 📂 Ocultar el input de subir archivo hasta que se active */
+.upload-input {
+    display: none;
+}
+
+/* 📂 Mostrar el input cuando está activo */
+.upload-active {
+    display: block;
+    margin-top: 5px;
+}
