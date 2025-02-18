@@ -152,6 +152,33 @@ function Folders() {
         }
     };
     
+    const handleDeleteFolder = async (event, folderId) => {
+        event.stopPropagation(); // Evita que el evento burbujee
+        
+        console.log("🗑️ Eliminando carpeta con ID:", folderId);
+    
+        if (!folderId) {
+            console.error("⚠️ Error: folderId es undefined o null.");
+            return;
+        }
+    
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta carpeta?");
+        if (!confirmDelete) return;
+    
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/folders/${folderId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+    
+            console.log("✅ Respuesta del servidor:", response.data);
+            alert("✅ Carpeta eliminada correctamente");
+            fetchFolders(); // Actualizar lista de carpetas
+        } catch (error) {
+            console.error("❌ Error al eliminar la carpeta:", error.response?.data || error.message);
+            alert(`❌ Error al eliminar la carpeta: ${error.response?.data?.error || error.message}`);
+        }
+    };
     
 
     return (
@@ -184,7 +211,10 @@ function Folders() {
                             <div className="folder-actions">
                                 <FaUpload className="upload-icon" onClick={() => setShowUploadSection(folder.id)} />
                                 <FaShare className="share-icon" onClick={() => setShowShareSection(folder.id)} />
-                                <FaTrash className="delete-icon" />
+                                <FaTrash 
+    className="delete-icon" 
+    onClick={(event) => handleDeleteFolder(event, folder.id)} 
+/>
                             </div>
                         </div>
                     ))
