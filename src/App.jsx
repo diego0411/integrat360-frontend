@@ -7,6 +7,7 @@ import Documents from "./pages/Documents";
 import Chat from "./components/Chat";
 import ManageUsers from "./pages/ManageUsers";
 import Folders from "./pages/Folders";
+import FoldersProyectos from "./pages/FoldersProyectos";
 import Login from "./pages/Login";
 import ManageGroups from "./pages/ManageGroups";
 import ManageEvents from "./pages/ManageEvents";
@@ -34,6 +35,7 @@ function AppContent() {
                     <Route path="/chat" element={user ? <Chat /> : <Navigate to="/login" />} />
                     <Route path="/manage-users" element={user ? <ManageUsers /> : <Navigate to="/login" />} />
                     <Route path="/folders" element={user ? <Folders /> : <Navigate to="/login" />} />
+                    <Route path="/folders/projects" element={<FoldersProyectos />} />
                 </Routes>
             </div>
         </div>

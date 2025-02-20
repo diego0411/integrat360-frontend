@@ -11,6 +11,7 @@ import EventIcon from "@mui/icons-material/Event";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/ExitToApp";
 import MenuIcon from "@mui/icons-material/Menu";
+import WorkIcon from "@mui/icons-material/Work"; // 📌 Nuevo ícono para carpetas de proyectos
 import "../styles/Sidebar.css";
 
 export default function Sidebar() {
@@ -61,6 +62,10 @@ export default function Sidebar() {
                     <ListItem button component={Link} to="/folders">
                         <ListItemIcon><FolderIcon sx={{ color: "white" }} /></ListItemIcon>
                         <ListItemText primary="Carpetas" />
+                    </ListItem>
+                    <ListItem button component={Link} to="/folders/projects"> {/* 📌 Nueva opción */}
+                        <ListItemIcon><WorkIcon sx={{ color: "white" }} /></ListItemIcon>
+                        <ListItemText primary="Carpetas de Proyectos" />
                     </ListItem>
                     <ListItem button component={Link} to="/manage-users">
                         <ListItemIcon><GroupIcon sx={{ color: "white" }} /></ListItemIcon>
