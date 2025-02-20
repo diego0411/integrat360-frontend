@@ -10,7 +10,6 @@ function Folders() {
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("");
-    const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [users, setUsers] = useState([]);
@@ -32,9 +31,9 @@ function Folders() {
             });
 
             setFolders({
-                ownFolders: Array.isArray(res.data.ownFolders) ? res.data.ownFolders : [],
-                sharedFolders: Array.isArray(res.data.sharedFolders) ? res.data.sharedFolders : [],
-                sharedGroupFolders: Array.isArray(res.data.sharedGroupFolders) ? res.data.sharedGroupFolders : [],
+                ownFolders: res.data.ownFolders || [],
+                sharedFolders: res.data.sharedFolders || [],
+                sharedGroupFolders: res.data.sharedGroupFolders || [],
             });
         } catch (error) {
             console.error("❌ Error al obtener carpetas:", error);
@@ -68,7 +67,10 @@ function Folders() {
     };
 
     const createFolder = async () => {
-        if (!newFolderName.trim()) return alert("⚠️ El nombre de la carpeta es obligatorio");
+        if (!newFolderName.trim()) {
+            alert("⚠️ El nombre de la carpeta es obligatorio");
+            return;
+        }
 
         try {
             const token = localStorage.getItem("token");
@@ -83,14 +85,13 @@ function Folders() {
         }
     };
 
-    const handleFileUpload = async () => {
-        if (!file || !selectedFolder) {
-            return alert("⚠️ Selecciona un archivo y una carpeta antes de subir.");
-        }
+    const handleFileUpload = async (event, folderId) => {
+        const file = event.target.files[0];
+        if (!file || !folderId) return;
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("folder_id", selectedFolder);
+        formData.append("folder_id", folderId);
 
         try {
             setUploading(true);
@@ -102,8 +103,6 @@ function Folders() {
                 }
             });
 
-            setFile(null);
-            setSelectedFolder(null);
             alert("✅ Archivo subido correctamente.");
         } catch (error) {
             console.error("❌ Error al subir el archivo:", error);
@@ -167,22 +166,33 @@ function Folders() {
                     <p>Cargando carpetas...</p>
                 ) : (
                     folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) => 
-                        folder ? (
-                            <div key={`folder-${folder.id}-${index}`} className="folder-card">
+                        folder && (
+                            <div key={`${folder.id}-${index}`} className="folder-card">
                                 <div onClick={() => navigate(`/folder/${folder.id}`)}>
                                     <FaFolder className="folder-icon" />
                                     <p className="folder-name">{folder.name || "Sin nombre"}</p>
                                 </div>
                                 <div className="folder-actions">
-                                    <FaUpload className="upload-icon" onClick={() => setSelectedFolder(folder.id)} />
-                                    <FaShare className="share-icon" onClick={() => {
-                                        setSelectedFolder(folder.id);
-                                        setShowShareModal(true);
-                                    }} />
-                                    <FaTrash className="delete-icon" />
+                                    <label>
+                                        <input 
+                                            type="file" 
+                                            style={{ display: "none" }} 
+                                            onChange={(e) => handleFileUpload(e, folder.id)} 
+                                        />
+                                        <FaUpload className="upload-icon" title="Subir archivo" />
+                                    </label>
+                                    <FaShare 
+                                        className="share-icon" 
+                                        title="Compartir" 
+                                        onClick={() => {
+                                            setSelectedFolder(folder.id);
+                                            setShowShareModal(true);
+                                        }} 
+                                    />
+                                    <FaTrash className="delete-icon" title="Eliminar" />
                                 </div>
                             </div>
-                        ) : null
+                        )
                     )
                 )}
             </div>

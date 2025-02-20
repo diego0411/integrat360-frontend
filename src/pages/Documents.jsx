@@ -6,8 +6,6 @@ function Documents() {
     const [file, setFile] = useState(null);
     const [folders, setFolders] = useState([]);
     const [folderId, setFolderId] = useState("");
-    const downloadUrl = `${import.meta.env.VITE_API_URL}/documents/download/${doc.id}`;
-
 
     useEffect(() => {
         fetchFolders();
@@ -57,10 +55,10 @@ function Documents() {
         }
     };
 
-    // 📌 Subir un archivo
+    // 📌 Subir un archivo a AWS S3
     const handleUpload = async () => {
         if (!folderId || !file) {
-            alert("Selecciona una carpeta y un archivo antes de subir.");
+            alert("⚠️ Selecciona una carpeta y un archivo antes de subir.");
             return;
         }
 
@@ -70,18 +68,19 @@ function Documents() {
 
         try {
             const token = localStorage.getItem("token");
-            await axios.post(`${import.meta.env.VITE_API_URL}/documents/`, formData, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/documents/`, formData, {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data"
                 }
             });
 
-            console.log("✅ Archivo subido correctamente");
+            alert("✅ Archivo subido correctamente");
             setFile(null);
             fetchDocuments();
         } catch (error) {
             console.error("❌ Error al subir el archivo:", error);
+            alert("❌ Error al subir el archivo. Revisa la consola.");
         }
     };
 
@@ -95,10 +94,11 @@ function Documents() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            console.log("🗑️ Documento eliminado");
+            alert("🗑️ Documento eliminado correctamente");
             fetchDocuments();
         } catch (error) {
             console.error("❌ Error al eliminar el documento:", error);
+            alert("❌ No se pudo eliminar el documento.");
         }
     };
 
@@ -117,7 +117,7 @@ function Documents() {
 
             {/* 📌 Subir Archivo */}
             <input type="file" onChange={(e) => setFile(e.target.files[0])} disabled={!folderId} />
-            <button onClick={handleUpload} disabled={!folderId || !file}>Subir Archivo</button>
+            <button onClick={handleUpload} disabled={!folderId || !file}>📤 Subir Archivo</button>
 
             {/* 📌 Lista de Documentos */}
             <h2>📄 Documentos en la Carpeta</h2>
@@ -126,7 +126,7 @@ function Documents() {
             ) : (
                 <ul>
                     {documents.map(doc => {
-                        const downloadUrl = `${import.meta.env.VITE_API_URL}/uploads/${doc.filename}`;
+                        const downloadUrl = `${import.meta.env.VITE_API_URL}/documents/download/${doc.id}`;
                         return (
                             <li key={doc.id}>
                                 <a 

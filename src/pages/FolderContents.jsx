@@ -13,15 +13,21 @@ function FolderContents() {
         fetchContents();
     }, [folderId]);
 
+    // 📌 Obtener contenido de la carpeta
     const fetchContents = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem("token");
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/folders/${folderId}/contents`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            setSubfolders(res.data.subfolders);
-            setDocuments(res.data.documents);
+            if (res.data) {
+                setSubfolders(res.data.subfolders || []);
+                setDocuments(res.data.documents || []);
+            } else {
+                console.warn("⚠️ Respuesta inesperada al obtener contenidos.");
+            }
         } catch (error) {
             console.error("❌ Error al obtener contenidos:", error);
         } finally {
@@ -38,16 +44,20 @@ function FolderContents() {
                 responseType: "blob", // 📥 Recibir como archivo binario
             });
 
-            // 📌 Crear un enlace de descarga
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+            // 📌 Obtener nombre del archivo desde los headers (si está disponible)
+            const contentDisposition = response.headers["content-disposition"];
+            const suggestedFileName = contentDisposition ? contentDisposition.split("filename=")[1] : documentName;
+
+            // 📥 Crear URL de descarga
+            const url = URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", documentName);
+            link.download = suggestedFileName || documentName;
             document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
 
-            // 📌 Eliminar el enlace después de la descarga
-            link.parentNode.removeChild(link);
+            console.log("✅ Archivo descargado correctamente:", suggestedFileName);
         } catch (error) {
             console.error("❌ Error al descargar el archivo:", error);
             alert("❌ No se pudo descargar el archivo.");
