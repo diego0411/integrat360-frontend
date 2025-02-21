@@ -15,6 +15,7 @@ function Folders() {
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         fetchFolders();
@@ -85,6 +86,31 @@ function Folders() {
         }
     };
 
+    const deleteFolder = async (folderId) => {
+        if (!window.confirm("⚠️ ¿Estás seguro de que quieres eliminar esta carpeta? Esta acción no se puede deshacer.")) {
+            return;
+        }
+
+        try {
+            setDeleting(true);
+            const token = localStorage.getItem("token");
+
+            console.log(`🗑️ Eliminando carpeta ID: ${folderId}`);
+
+            await axios.delete(`${import.meta.env.VITE_API_URL}/folders/${folderId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert("✅ Carpeta eliminada correctamente.");
+            fetchFolders();
+        } catch (error) {
+            console.error("❌ Error al eliminar la carpeta:", error);
+            alert("❌ No se pudo eliminar la carpeta.");
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     const handleFileUpload = async (event, folderId) => {
         const file = event.target.files[0];
         if (!file || !folderId) return;
@@ -112,41 +138,9 @@ function Folders() {
         }
     };
 
-    const shareFolder = async () => {
-        if (!selectedFolder || (!selectedUser && !selectedGroup)) {
-            return alert("⚠️ Selecciona una carpeta y un usuario o grupo para compartir.");
-        }
-
-        try {
-            const token = localStorage.getItem("token");
-
-            if (selectedUser) {
-                await axios.post(`${import.meta.env.VITE_API_URL}/folders/share`, 
-                    { folderId: selectedFolder, userId: selectedUser }, 
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-            }
-
-            if (selectedGroup) {
-                await axios.post(`${import.meta.env.VITE_API_URL}/folders/share/group`, 
-                    { folderId: selectedFolder, groupId: selectedGroup }, 
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-            }
-
-            alert("✅ Carpeta compartida correctamente.");
-            setShowShareModal(false);
-            setSelectedFolder(null);
-            setSelectedUser("");
-            setSelectedGroup("");
-        } catch (error) {
-            console.error("❌ Error al compartir la carpeta:", error);
-        }
-    };
-
     return (
         <div className="folders-container">
-            <h1>📂 Gestión  Documental</h1>
+            <h1>📂 Gestión Documental</h1>
 
             <div className="folder-form">
                 <input
@@ -189,37 +183,18 @@ function Folders() {
                                             setShowShareModal(true);
                                         }} 
                                     />
-                                    <FaTrash className="delete-icon" title="Eliminar" />
+                                    <FaTrash 
+                                        className="delete-icon" 
+                                        title="Eliminar" 
+                                        onClick={() => deleteFolder(folder.id)}
+                                        style={{ cursor: deleting ? "not-allowed" : "pointer", opacity: deleting ? 0.5 : 1 }}
+                                    />
                                 </div>
                             </div>
                         )
                     )
                 )}
             </div>
-
-            {showShareModal && (
-                <div className="modal">
-                    <h2>📤 Compartir Carpeta</h2>
-                    <label>Selecciona un usuario:</label>
-                    <select onChange={(e) => setSelectedUser(e.target.value)} value={selectedUser}>
-                        <option value="">Selecciona un usuario</option>
-                        {users.map(user => (
-                            <option key={user.id} value={user.id}>{user.name}</option>
-                        ))}
-                    </select>
-
-                    <label>Selecciona un grupo:</label>
-                    <select onChange={(e) => setSelectedGroup(e.target.value)} value={selectedGroup}>
-                        <option value="">Selecciona un grupo</option>
-                        {groups.map(group => (
-                            <option key={group.id} value={group.id}>{group.name}</option>
-                        ))}
-                    </select>
-
-                    <button onClick={shareFolder}>Compartir</button>
-                    <button onClick={() => setShowShareModal(false)}>Cancelar</button>
-                </div>
-            )}
         </div>
     );
 }
