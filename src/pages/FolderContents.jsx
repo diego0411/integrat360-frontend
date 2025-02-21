@@ -3,106 +3,85 @@ import axios from "axios";
 import { useParams, Link } from "react-router-dom";
 
 function FolderContents() {
-    const { folderId } = useParams(); // 📌 Obtener el ID de la carpeta desde la URL
+    const { folderId } = useParams();
     const [subfolders, setSubfolders] = useState([]);
     const [documents, setDocuments] = useState([]);
-    const [newFolderName, setNewFolderName] = useState(""); // Estado para el nombre de la nueva subcarpeta
+    const [newFolderName, setNewFolderName] = useState("");
     const [loading, setLoading] = useState(true);
+    const [allFolders, setAllFolders] = useState([]);
 
     useEffect(() => {
-        fetchContents();
+        loadFolderData();
     }, [folderId]);
 
-    // 📌 Obtener contenido de la carpeta
-    const fetchContents = async () => {
+    const loadFolderData = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             const token = localStorage.getItem("token");
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/folders/${folderId}/contents`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
 
-            if (res.data) {
-                setSubfolders(res.data.subfolders || []);
-                setDocuments(res.data.documents || []);
-            } else {
-                console.warn("⚠️ Respuesta inesperada al obtener contenidos.");
+            if (!token) {
+                console.error("❌ No hay token de autenticación.");
+                return;
             }
+
+            const [contentRes, foldersRes] = await Promise.all([
+                axios.get(`${import.meta.env.VITE_API_URL}/folders/${folderId}/contents`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }),
+                axios.get(`${import.meta.env.VITE_API_URL}/folders`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            ]);
+
+            console.log("📂 Contenido de la carpeta:", contentRes.data);
+            console.log("🚀 Todas las carpetas recibidas:", foldersRes.data);
+
+            setSubfolders(contentRes.data.subfolders || []);
+            setDocuments(contentRes.data.documents || []);
+
+            // 🔎 Verificar si la API devuelve un array válido
+            const foldersArray = Array.isArray(foldersRes.data) ? foldersRes.data : [];
+            console.log("📁 Lista de todas las carpetas:", foldersArray);
+
+            setAllFolders(foldersArray);
+            console.log("✅ Estado actualizado: allFolders =", foldersArray);
+
         } catch (error) {
-            console.error("❌ Error al obtener contenidos:", error);
+            console.error("❌ Error al cargar contenido de la carpeta:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    // 📌 Función para descargar un documento
-    const downloadFile = async (documentId, documentName) => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/documents/download/${documentId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: "blob", // 📥 Recibir como archivo binario
-            });
-
-            // 📌 Obtener nombre del archivo desde los headers (si está disponible)
-            const contentDisposition = response.headers["content-disposition"];
-            const suggestedFileName = contentDisposition ? contentDisposition.split("filename=")[1] : documentName;
-
-            // 📥 Crear URL de descarga
-            const url = URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = suggestedFileName || documentName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            console.log("✅ Archivo descargado correctamente:", suggestedFileName);
-        } catch (error) {
-            console.error("❌ Error al descargar el archivo:", error);
-            alert("❌ No se pudo descargar el archivo.");
-        }
-    };
-
-    // 📌 Función para crear una subcarpeta dentro de la carpeta actual
-    const createSubfolder = async () => {
-        if (!newFolderName.trim()) {
-            alert("⚠️ Ingresa un nombre para la subcarpeta.");
+    const moveSubfolder = async (subfolderId, newParentId) => {
+        if (!subfolderId || !newParentId || newParentId === folderId) {
+            alert("⚠️ Debes seleccionar una nueva carpeta diferente.");
             return;
         }
 
         try {
             const token = localStorage.getItem("token");
-            await axios.post(`${import.meta.env.VITE_API_URL}/folders`, {
-                name: newFolderName,
-                parent_id: folderId, // 📂 Establecer la carpeta padre como la actual
+
+            console.log(`📂 Moviendo subcarpeta ID: ${subfolderId} ➡️ Nueva carpeta: ${newParentId}`);
+
+            await axios.put(`${import.meta.env.VITE_API_URL}/folders/move`, {
+                folder_id: subfolderId,
+                new_parent_id: newParentId
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            setNewFolderName(""); // Limpiar el input
-            fetchContents(); // Refrescar la lista de subcarpetas
-            alert("✅ Subcarpeta creada correctamente.");
+            alert("✅ Carpeta movida correctamente.");
+            loadFolderData();
         } catch (error) {
-            console.error("❌ Error al crear subcarpeta:", error);
-            alert("❌ Error al crear la subcarpeta.");
+            console.error("❌ Error al mover la carpeta:", error);
+            alert("❌ Error al mover la carpeta.");
         }
     };
 
     return (
         <div className="folder-contents" style={{ backgroundColor: "#fff", minHeight: "100vh", padding: "20px" }}>
             <h2>📁 Contenido de la Carpeta</h2>
-
-            {/* 📌 Input para crear una nueva subcarpeta */}
-            <div className="create-subfolder">
-                <input
-                    type="text"
-                    placeholder="Nombre de la subcarpeta"
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                />
-                <button onClick={createSubfolder}>Crear Subcarpeta</button>
-            </div>
 
             {loading ? <p>Cargando...</p> : (
                 <>
@@ -112,6 +91,17 @@ function FolderContents() {
                             subfolders.map(folder => (
                                 <li key={folder.id}>
                                     <Link to={`/folder/${folder.id}`}>{folder.name}</Link>
+                                    <select
+                                        onChange={(e) => moveSubfolder(folder.id, e.target.value)}
+                                        style={{ marginLeft: "10px", fontSize: "12px", padding: "3px" }}
+                                    >
+                                        <option value="">Mover a...</option>
+                                        {allFolders.length > 0 ? allFolders.map(parent => (
+                                            <option key={parent.id} value={parent.id}>
+                                                {parent.name}
+                                            </option>
+                                        )) : <option disabled>No hay carpetas disponibles</option>}
+                                    </select>
                                 </li>
                             ))
                         }
@@ -122,7 +112,10 @@ function FolderContents() {
                         {documents.length === 0 ? <p>No hay documentos.</p> :
                             documents.map(doc => (
                                 <li key={doc.id}>
-                                    <button onClick={() => downloadFile(doc.id, doc.name)}>
+                                    <button
+                                        onClick={() => downloadFile(doc.id, doc.name)}
+                                        style={{ fontSize: "12px", padding: "5px" }}
+                                    >
                                         📥 Descargar {doc.name}
                                     </button>
                                 </li>
