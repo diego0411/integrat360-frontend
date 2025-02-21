@@ -146,7 +146,7 @@ function Folders() {
 
     return (
         <div className="folders-container">
-            <h1>📂 Gestión de Carpetas</h1>
+            <h1>📂 Gestión de Documental</h1>
 
             <div className="folder-form">
                 <input

@@ -66,7 +66,7 @@ function FoldersProyectos() {
 
     return (
         <div className="folders-container">
-            <h1>📁 Carpetas de Proyectos</h1>
+            <h1>📁 Gestion de Carpetas de Proyectos</h1>
 
             <div className="folders-grid">
                 {loading ? <p>Cargando carpetas...</p> : (
