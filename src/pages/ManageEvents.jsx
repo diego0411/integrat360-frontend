@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { 
+    Box, Typography, Button, TextField, Select, MenuItem, CircularProgress,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
+} from "@mui/material";
+import { FaTrash } from "react-icons/fa";
 
 function ManageEvents() {
     const [events, setEvents] = useState([]);
@@ -22,7 +27,6 @@ function ManageEvents() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEvents(res.data);
-            console.log("📅 Eventos cargados:", res.data);
         } catch (error) {
             setErrorMessage("❌ Error al obtener eventos.");
             console.error("❌ Error al obtener eventos:", error);
@@ -32,12 +36,12 @@ function ManageEvents() {
     // 📌 Crear un evento
     const handleSaveEvent = async () => {
         if (!title || !date || !visibility) {
-            alert("Por favor, completa todos los campos obligatorios.");
+            alert("⚠️ Completa todos los campos obligatorios.");
             return;
         }
 
         if (new Date(date) < new Date()) {
-            alert("La fecha del evento debe ser posterior a la fecha actual.");
+            alert("⛔ La fecha del evento debe ser futura.");
             return;
         }
 
@@ -52,7 +56,6 @@ function ManageEvents() {
                     "Content-Type": "application/json"
                 }
             });
-            console.log("✅ Evento creado correctamente");
             setTitle("");
             setDescription("");
             setDate("");
@@ -76,7 +79,6 @@ function ManageEvents() {
             await axios.delete(`${import.meta.env.VITE_API_URL}/events/${eventId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log("🗑️ Evento eliminado correctamente");
             fetchEvents();
         } catch (error) {
             setErrorMessage("❌ Error al eliminar el evento.");
@@ -87,58 +89,68 @@ function ManageEvents() {
     };
 
     return (
-        <div className="container">
-            <h1>📅 Gestión de Eventos</h1>
+        <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh", maxWidth: "800px", margin: "auto", borderRadius: 2, boxShadow: 1 }}>
+            <Typography variant="h5" gutterBottom>📅 Gestión de Eventos</Typography>
 
             {/* 📌 Mensaje de error */}
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
+            {errorMessage && (
+                <Typography color="error" sx={{ mb: 2 }}>
+                    {errorMessage}
+                </Typography>
+            )}
 
             {/* 📌 Formulario para agregar eventos */}
-            <div className="event-form">
-                <input
-                    type="text"
-                    placeholder="Título del evento"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Descripción (opcional)"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-                <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                />
-                <select value={visibility} onChange={(e) => setVisibility(e.target.value)}>
-                    <option value="public">Público</option>
-                    <option value="private">Privado</option>
-                </select>
-                <button onClick={handleSaveEvent} disabled={loading}>
-                    {loading ? "Cargando..." : "➕ Agregar Evento"}
-                </button>
-            </div>
+            <Paper sx={{ p: 3, mb: 4 }}>
+                <Typography variant="h6">Agregar Evento</Typography>
+                <Box component="form" sx={{ display: "grid", gap: 2, mt: 2 }}>
+                    <TextField size="small" label="Título del evento" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                    <TextField size="small" label="Descripción (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} />
+                    <TextField size="small" label="Fecha del evento" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                    <Select size="small" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
+                        <MenuItem value="public">Público</MenuItem>
+                        <MenuItem value="private">Privado</MenuItem>
+                    </Select>
+                    <Button onClick={handleSaveEvent} variant="contained" disabled={loading}>
+                        {loading ? "Cargando..." : "➕ Agregar Evento"}
+                    </Button>
+                </Box>
+            </Paper>
 
             {/* 📌 Lista de eventos */}
-            <h2>📋 Mis Eventos</h2>
-            {events.length === 0 ? (
-                <p>No hay eventos disponibles.</p>
+            <Typography variant="h6">📋 Mis Eventos</Typography>
+            {loading ? (
+                <CircularProgress />
+            ) : events.length === 0 ? (
+                <Typography>No hay eventos disponibles.</Typography>
             ) : (
-                <ul className="chat-messages">
-                    {events.map(event => (
-                        <li key={event.id}>
-                            <strong>{event.title}</strong> - {event.date} [{event.visibility}]
-                            <p>{event.description}</p>
-                            <button onClick={() => handleDeleteEvent(event.id)} disabled={loading}>
-                                🗑️ Eliminar
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                <TableContainer component={Paper} sx={{ mt: 2 }}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Título</TableCell>
+                                <TableCell>Fecha</TableCell>
+                                <TableCell>Visibilidad</TableCell>
+                                <TableCell>Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {events.map(event => (
+                                <TableRow key={event.id}>
+                                    <TableCell>{event.title}</TableCell>
+                                    <TableCell>{event.date}</TableCell>
+                                    <TableCell>{event.visibility === "public" ? "Público" : "Privado"}</TableCell>
+                                    <TableCell>
+                                        <Button size="small" color="error" onClick={() => handleDeleteEvent(event.id)} sx={{ minWidth: "auto" }}>
+                                            <FaTrash />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
-        </div>
+        </Box>
     );
 }
 

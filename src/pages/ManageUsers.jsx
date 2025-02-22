@@ -2,7 +2,11 @@ import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEdit, FaTrash } from "react-icons/fa"; // Íconos para los botones
+import { 
+    Box, Typography, Button, TextField, Select, MenuItem, CircularProgress, 
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
+} from "@mui/material";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 function ManageUsers() {
     const { user } = useContext(AuthContext);
@@ -44,11 +48,9 @@ function ManageUsers() {
                 await axios.put(`${import.meta.env.VITE_API_URL}/users/${editUserId}`, newUser, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                console.log("✅ Usuario actualizado:", newUser);
                 alert("✅ Usuario actualizado correctamente.");
             } else {
                 await axios.post(`${import.meta.env.VITE_API_URL}/users/register`, newUser);
-                console.log("✅ Usuario registrado:", newUser);
                 alert("✅ Usuario registrado correctamente.");
             }
             setNewUser({ name: "", email: "", password: "", role: "user", birthdate: "" });
@@ -78,7 +80,6 @@ function ManageUsers() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(users.filter(user => user.id !== id));
-            console.log("🗑️ Usuario eliminado");
             alert("✅ Usuario eliminado correctamente.");
         } catch (error) {
             console.error("❌ Error al eliminar usuario:", error.response?.data || error.message);
@@ -86,42 +87,61 @@ function ManageUsers() {
     };
 
     return (
-        <div className="container">
-            <h1>👥 Gestión de Usuarios</h1>
+        <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh", maxWidth: "900px", margin: "auto", borderRadius: 2, boxShadow: 1 }}>
+            <Typography variant="h5" gutterBottom>👥 Gestión de Usuarios</Typography>
 
-            {/* 📌 Formulario de Registro y Edición (Reducido en tamaño) */}
-            <div className="form-container small-form">
-                <h2>{editUserId ? "Editar Usuario" : "Registrar Nuevo Usuario"}</h2>
-                <form onSubmit={handleRegisterOrEdit}>
-                    <input type="text" placeholder="Nombre" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} required />
-                    <input type="email" placeholder="Correo" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} required />
-                    {!editUserId && <input type="password" placeholder="Contraseña" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} required />}
-                    <input type="date" placeholder="Fecha de Nacimiento" value={newUser.birthdate} onChange={(e) => setNewUser({ ...newUser, birthdate: e.target.value })} required />
-                    <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
-                        <option value="user">Usuario</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                    <button type="submit">{editUserId ? "Actualizar" : "Registrar"}</button>
-                    {editUserId && <button type="button" onClick={() => { setEditUserId(null); setNewUser({ name: "", email: "", password: "", role: "user", birthdate: "" }) }}>Cancelar</button>}
-                </form>
-            </div>
+            {/* 📌 Formulario de Registro y Edición */}
+            <Paper sx={{ p: 3, mb: 4 }}>
+                <Typography variant="h6">{editUserId ? "Editar Usuario" : "Registrar Nuevo Usuario"}</Typography>
+                <Box component="form" onSubmit={handleRegisterOrEdit} sx={{ display: "grid", gap: 2, mt: 2 }}>
+                    <TextField size="small" label="Nombre" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} required />
+                    <TextField size="small" label="Correo" type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} required />
+                    {!editUserId && <TextField size="small" label="Contraseña" type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} required />}
+                    <TextField size="small" label="Fecha de Nacimiento" type="date" value={newUser.birthdate} onChange={(e) => setNewUser({ ...newUser, birthdate: e.target.value })} required />
+                    <Select size="small" value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
+                        <MenuItem value="user">Usuario</MenuItem>
+                        <MenuItem value="admin">Administrador</MenuItem>
+                    </Select>
+                    <Button type="submit" variant="contained">{editUserId ? "Actualizar" : "Registrar"}</Button>
+                    {editUserId && <Button variant="outlined" color="error" onClick={() => { setEditUserId(null); setNewUser({ name: "", email: "", password: "", role: "user", birthdate: "" }) }}>Cancelar</Button>}
+                </Box>
+            </Paper>
 
-            {/* 📌 Lista de Usuarios en formato GRID con tarjetas más pequeñas */}
-            {loading ? <p>Cargando usuarios...</p> : (
-                <div className="user-grid">
-                    {users.map(user => (
-                        <div key={user.id} className="user-card small-card">
-                            <p><strong>{user.name}</strong></p>
-                            <p>{user.email}</p>
-                            <div className="actions">
-                                <button className="icon-btn edit-btn" onClick={() => handleEdit(user)}><FaEdit /></button>
-                                <button className="icon-btn delete-btn" onClick={() => handleDelete(user.id)}><FaTrash /></button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            {/* 📌 Lista de Usuarios */}
+            {loading ? (
+                <CircularProgress />
+            ) : (
+                <TableContainer component={Paper} sx={{ mt: 4 }}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Nombre</TableCell>
+                                <TableCell>Correo</TableCell>
+                                <TableCell>Rol</TableCell>
+                                <TableCell>Acciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {users.map(user => (
+                                <TableRow key={user.id}>
+                                    <TableCell>{user.name}</TableCell>
+                                    <TableCell>{user.email}</TableCell>
+                                    <TableCell>{user.role === "admin" ? "Administrador" : "Usuario"}</TableCell>
+                                    <TableCell>
+                                        <Button size="small" onClick={() => handleEdit(user)} sx={{ minWidth: "auto", mr: 1 }}>
+                                            <FaEdit />
+                                        </Button>
+                                        <Button size="small" color="error" onClick={() => handleDelete(user.id)} sx={{ minWidth: "auto" }}>
+                                            <FaTrash />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
-        </div>
+        </Box>
     );
 }
 

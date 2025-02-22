@@ -1,7 +1,10 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-import { FaEye, FaTrash, FaTimes } from "react-icons/fa"; // Iconos para los botones
+import { FaEye, FaTrash, FaTimes } from "react-icons/fa";
+import { 
+    Box, Button, TextField, Select, MenuItem, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Paper, Divider 
+} from "@mui/material";
 
 function ManageGroups() {
     const { user } = useContext(AuthContext);
@@ -26,7 +29,7 @@ function ManageGroups() {
             });
             setGroups(response.data || []);
         } catch (error) {
-            console.error("❌ Error al obtener grupos:", error.response?.data || error.message);
+            console.error("❌ Error al obtener grupos:", error);
             setGroups([]);
         }
     };
@@ -43,8 +46,7 @@ function ManageGroups() {
         }
     };
 
-    const handleCreateGroup = async (e) => {
-        e.preventDefault();
+    const handleCreateGroup = async () => {
         if (!newGroupName.trim()) {
             alert("❌ El nombre del grupo no puede estar vacío.");
             return;
@@ -61,7 +63,6 @@ function ManageGroups() {
             setNewGroupName("");
             setShowCreateGroup(false);
             fetchGroups();
-            alert("✅ Grupo creado exitosamente.");
         } catch (error) {
             console.error("❌ Error al crear grupo:", error);
         }
@@ -98,7 +99,6 @@ function ManageGroups() {
             fetchGroupMembers(selectedGroup);
             setSelectedUser("");
             setShowAddMember(false);
-            alert("✅ Usuario agregado correctamente al grupo.");
         } catch (error) {
             console.error("❌ Error al agregar usuario:", error);
         }
@@ -115,98 +115,101 @@ function ManageGroups() {
             );
 
             fetchGroupMembers(selectedGroup);
-            alert("✅ Usuario eliminado correctamente del grupo.");
         } catch (error) {
             console.error("❌ Error al eliminar usuario del grupo:", error);
         }
     };
 
     return (
-        <div className="groups-container">
-            {/* 📌 Tarjeta Lista de Grupos */}
-            <div className="group-list">
-                <button className="btn-primary" onClick={() => setShowCreateGroup(!showCreateGroup)}>
-                    + Crear Grupo
-                </button>
+        <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+            <Typography variant="h5" gutterBottom>👥 Gestión de Grupos</Typography>
 
-                {showCreateGroup && (
-                    <div className="group-form">
-                        <input
-                            type="text"
-                            placeholder="Nombre del grupo"
-                            value={newGroupName}
-                            onChange={(e) => setNewGroupName(e.target.value)}
-                        />
-                        <button onClick={handleCreateGroup}>Crear</button>
-                        <button className="btn-cancel" onClick={() => setShowCreateGroup(false)}>
-                            <FaTimes /> Cancelar
-                        </button>
-                    </div>
-                )}
+            {/* 📌 Crear Grupo */}
+            <Button variant="contained" onClick={() => setShowCreateGroup(!showCreateGroup)} sx={{ mb: 2 }}>
+                {showCreateGroup ? <FaTimes /> : "+ Crear Grupo"}
+            </Button>
 
-                <h2>📋 Lista de Grupos</h2>
-                {groups.length === 0 ? (
-                    <p>⚠️ No hay grupos creados.</p>
-                ) : (
-                    <ul>
-                        {groups.map((group) => (
-                            <li key={group.id}>
-                                {group.name}{" "}
-                                <button className="btn-view" onClick={() => fetchGroupMembers(group)}>
-                                    <FaEye />
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
+            {showCreateGroup && (
+                <Paper sx={{ p: 2, mb: 2 }}>
+                    <TextField
+                        fullWidth
+                        label="Nombre del grupo"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        sx={{ mb: 2 }}
+                    />
+                    <Button variant="contained" onClick={handleCreateGroup}>Crear</Button>
+                </Paper>
+            )}
 
-            {/* 📌 Tarjeta Miembros del Grupo (solo si hay un grupo seleccionado) */}
+            {/* 📌 Lista de Grupos */}
+            <Typography variant="h6">📋 Lista de Grupos</Typography>
+            {groups.length === 0 ? (
+                <Typography variant="body2">⚠️ No hay grupos creados.</Typography>
+            ) : (
+                <List>
+                    {groups.map((group) => (
+                        <ListItem key={group.id} button onClick={() => fetchGroupMembers(group)}>
+                            <ListItemText primary={group.name} />
+                            <ListItemSecondaryAction>
+                                <IconButton onClick={() => fetchGroupMembers(group)}>
+                                    <FaEye className="icon" />
+                                </IconButton>
+                            </ListItemSecondaryAction>
+                        </ListItem>
+                    ))}
+                </List>
+            )}
+
+            <Divider sx={{ my: 3 }} />
+
+            {/* 📌 Miembros del Grupo */}
             {selectedGroup && (
-                <div className="group-members">
-                    <button className="btn-cancel close-btn" onClick={() => setSelectedGroup(null)}>
-                        <FaTimes /> Cerrar
-                    </button>
+                <Paper sx={{ p: 3 }}>
+                    <Typography variant="h6">👥 Miembros de: {selectedGroup.name}</Typography>
 
-                    <button className="btn-primary" onClick={() => setShowAddMember(!showAddMember)}>
-                        👥 Agregar Miembro
-                    </button>
+                    <Button variant="contained" sx={{ mt: 2, mb: 2 }} onClick={() => setShowAddMember(!showAddMember)}>
+                        {showAddMember ? <FaTimes /> : "➕ Agregar Miembro"}
+                    </Button>
 
                     {showAddMember && (
-                        <div className="group-form">
-                            <select onChange={(e) => setSelectedUser(e.target.value)}>
-                                <option value="">Selecciona un usuario</option>
+                        <Paper sx={{ p: 2, mb: 2 }}>
+                            <Select
+                                fullWidth
+                                value={selectedUser}
+                                onChange={(e) => setSelectedUser(e.target.value)}
+                                displayEmpty
+                            >
+                                <MenuItem value="" disabled>Selecciona un usuario</MenuItem>
                                 {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
+                                    <MenuItem key={user.id} value={user.id}>
                                         {user.name} ({user.email})
-                                    </option>
+                                    </MenuItem>
                                 ))}
-                            </select>
-                            <button onClick={handleAddUserToGroup}>Agregar</button>
-                            <button className="btn-cancel" onClick={() => setShowAddMember(false)}>
-                                <FaTimes /> Cancelar
-                            </button>
-                        </div>
+                            </Select>
+                            <Button variant="contained" sx={{ mt: 2 }} onClick={handleAddUserToGroup}>Agregar</Button>
+                        </Paper>
                     )}
 
-                    <h2>👥 Miembros: {selectedGroup.name}</h2>
                     {selectedGroup.members.length === 0 ? (
-                        <p>⚠️ No hay miembros en este grupo.</p>
+                        <Typography variant="body2">⚠️ No hay miembros en este grupo.</Typography>
                     ) : (
-                        <ul>
+                        <List>
                             {selectedGroup.members.map((member) => (
-                                <li key={member.id}>
-                                    {member.name} ({member.email}){" "}
-                                    <button className="btn-delete" onClick={() => handleRemoveUserFromGroup(member.id)}>
-                                        <FaTrash />
-                                    </button>
-                                </li>
+                                <ListItem key={member.id}>
+                                    <ListItemText primary={`${member.name} (${member.email})`} />
+                                    <ListItemSecondaryAction>
+                                        <IconButton onClick={() => handleRemoveUserFromGroup(member.id)}>
+                                            <FaTrash className="icon" />
+                                        </IconButton>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
                             ))}
-                        </ul>
+                        </List>
                     )}
-                </div>
+                </Paper>
             )}
-        </div>
+        </Box>
     );
 }
 
