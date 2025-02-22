@@ -61,11 +61,11 @@ export default function Sidebar() {
                     </ListItem>
                     <ListItem button component={Link} to="/folders">
                         <ListItemIcon><FolderIcon sx={{ color: "white" }} /></ListItemIcon>
-                        <ListItemText primary="Carpetas" />
+                        <ListItemText primary="Gestión Documental" />
                     </ListItem>
                     <ListItem button component={Link} to="/folders/projects"> {/* 📌 Nueva opción */}
                         <ListItemIcon><WorkIcon sx={{ color: "white" }} /></ListItemIcon>
-                        <ListItemText primary="Carpetas de Proyectos" />
+                        <ListItemText primary="Gestión de Proyectos" />
                     </ListItem>
                     <ListItem button component={Link} to="/manage-users">
                         <ListItemIcon><GroupIcon sx={{ color: "white" }} /></ListItemIcon>
