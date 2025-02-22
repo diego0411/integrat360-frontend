@@ -20,6 +20,7 @@ body {
 /* 📌 Contenedor principal */
 .folders-container {
     max-width: 700px;
+    width: 90%;
     margin: 40px auto;
     padding: 20px;
     background: var(--card-bg);
@@ -34,6 +35,7 @@ body {
     margin: 0;
 }
 
+/* 📁 Elemento de carpeta */
 .folder-item {
     display: flex;
     align-items: center;
@@ -43,6 +45,7 @@ body {
     transition: background 0.3s ease;
     cursor: pointer;
     border-radius: 4px;
+    word-wrap: break-word;
 }
 
 .folder-item:last-child {
@@ -65,9 +68,12 @@ body {
     flex-grow: 1;
     font-weight: 600;
     color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* 📤 Íconos de acciones (Compartir / Eliminar) */
+/* 📤 Íconos de acciones */
 .folder-actions {
     display: flex;
     align-items: center;
@@ -97,12 +103,14 @@ body {
 button {
     background-color: var(--primary-color);
     color: white;
-    padding: 10px 16px;
+    padding: 12px 18px;
     border: none;
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;
     transition: background 0.3s ease;
+    width: 100%;
+    text-align: center;
 }
 
 button:hover {
@@ -112,7 +120,7 @@ button:hover {
 /* 📌 Inputs */
 input, select, textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin: 10px 0;
     border: 1px solid var(--primary-color);
     border-radius: 6px;
@@ -122,8 +130,7 @@ input, select, textarea {
 /* 📌 Ajustes Responsivos */
 @media (max-width: 768px) {
     .folders-container {
-        max-width: 100%;
-        margin: 20px;
+        max-width: 95%;
         padding: 15px;
     }
 
@@ -131,10 +138,26 @@ input, select, textarea {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
+        padding: 10px;
+    }
+
+    .folder-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    button {
+        font-size: 16px;
+        padding: 14px;
+    }
+
+    input, select, textarea {
+        font-size: 16px;
+        padding: 14px;
     }
 }
 
-/* Fondo elegante */
+/* 🎨 Fondo elegante */
 body {
     background-image: url('/solariaF.jpg');
     background-size: cover;
