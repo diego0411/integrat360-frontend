@@ -9,8 +9,12 @@ function Dashboard() {
     const [birthdays, setBirthdays] = useState([]);
     const [selectedEvents, setSelectedEvents] = useState([]);
     const [selectedBirthdays, setSelectedBirthdays] = useState([]);
+    const [userId, setUserId] = useState(null);
+    const [userGroups, setUserGroups] = useState([]);
 
     useEffect(() => {
+        requestNotificationPermission();
+        fetchUserData();
         fetchEvents();
         fetchBirthdays();
     }, []);
@@ -19,7 +23,30 @@ function Dashboard() {
         handleDateChange(selectedDate);
     }, [events, birthdays]);
 
-    // 📌 Obtener eventos
+    // 📌 Solicitar permiso de notificaciones
+    const requestNotificationPermission = () => {
+        if (Notification.permission === "default") {
+            Notification.requestPermission().then(permission => {
+                console.log("🔔 Permiso de notificaciones:", permission);
+            });
+        }
+    };
+
+    // 📌 Obtener datos del usuario y sus grupos
+    const fetchUserData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/user`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUserId(res.data.id);
+            setUserGroups(res.data.groups || []);
+        } catch (error) {
+            console.error("❌ Error al obtener datos del usuario:", error.response?.data || error.message);
+        }
+    };
+
+    // 📌 Obtener eventos desde la API
     const fetchEvents = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -32,77 +59,83 @@ function Dashboard() {
                 })
             ]);
 
-            const publicData = Array.isArray(publicEvents.data) ? publicEvents.data : [];
-            const userData = Array.isArray(userEvents.data) ? userEvents.data : [];
-
-            const allEvents = [...publicData, ...userData].map(event => ({
+            const allEvents = [...publicEvents.data, ...userEvents.data].map(event => ({
                 ...event,
-                date: event.date ? new Date(event.date).toISOString().split("T")[0] : null
-            })).filter(event => event.date);
+                date: new Date(event.date).toISOString().split("T")[0] // Convertir a formato YYYY-MM-DD
+            }));
 
+            console.log("📌 Eventos obtenidos desde la API:", allEvents);
             setEvents(allEvents);
+            checkForNewEvents(allEvents);
         } catch (error) {
             console.error("❌ Error al obtener eventos:", error.response?.data || error.message);
         }
     };
 
-    // 📌 Obtener cumpleaños
+    // 📌 Verificar si hay nuevos eventos relevantes para el usuario
+    const checkForNewEvents = (allEvents) => {
+        if (!userId) return;
+
+        const relevantEvents = allEvents.filter(event =>
+            event.visibility === "public" ||
+            event.target_user_id === userId ||
+            (event.target_group_id && userGroups.includes(event.target_group_id))
+        );
+
+        if (relevantEvents.length > 0) {
+            relevantEvents.forEach(event => sendNotification(event));
+        }
+    };
+
+    // 📌 Enviar una notificación al usuario
+    const sendNotification = (event) => {
+        if (Notification.permission === "granted") {
+            new Notification("📅 Nuevo evento disponible", {
+                body: `${event.title} - ${event.date}`,
+                icon: "/icon.png"
+            });
+        }
+    };
+
+    // 📌 Obtener cumpleaños desde la API
     const fetchBirthdays = async () => {
         try {
             const token = localStorage.getItem("token");
-            const month = new Date().getMonth() + 1; 
+            const month = new Date().getMonth() + 1;
 
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/users/birthdays?month=${month}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            const data = res.data;
-            if (!data || data.length === 0) return;
-
-            const birthdaysFormatted = data.map(user => ({
+            const birthdaysFormatted = res.data.map(user => ({
                 ...user,
                 birthdateFormatted: new Date(user.birthdate).toISOString().slice(0, 10)
             }));
 
+            console.log("🎂 Cumpleaños obtenidos desde la API:", birthdaysFormatted);
             setBirthdays(birthdaysFormatted);
         } catch (error) {
             console.error("❌ Error al obtener cumpleaños:", error);
         }
     };
 
-    // 📌 Manejar el cambio de fecha en el calendario (Ahora filtra toda la semana)
+    // 📌 Manejar el cambio de fecha en el calendario
     const handleDateChange = (date) => {
         setSelectedDate(date);
+        const formattedDate = new Date(date).toISOString().split("T")[0];
 
-        // 📌 Calcular el lunes y domingo de la semana seleccionada
-        const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - date.getDay() + 1); // Lunes
-        startOfWeek.setHours(0, 0, 0, 0);
+        console.log(`📅 Mostrando eventos y cumpleaños para: ${formattedDate}`);
 
-        const endOfWeek = new Date(date);
-        endOfWeek.setDate(date.getDate() - date.getDay() + 7); // Domingo
-        endOfWeek.setHours(23, 59, 59, 999);
-
-        console.log(`📅 Mostrando eventos y cumpleaños entre: ${startOfWeek.toISOString().split("T")[0]} - ${endOfWeek.toISOString().split("T")[0]}`);
-
-        // 📌 Filtrar eventos dentro de la semana
-        const filteredEvents = events.filter(event => {
-            const eventDate = new Date(event.date);
-            return eventDate >= startOfWeek && eventDate <= endOfWeek;
-        });
-
+        // 📌 Filtrar eventos solo de la fecha seleccionada
+        const filteredEvents = events.filter(event => event.date === formattedDate);
+        console.log("🔵 Eventos filtrados para la fecha:", filteredEvents);
         setSelectedEvents(filteredEvents);
 
-        // 📌 Filtrar cumpleaños dentro de la semana (Comparando solo día y mes)
-        const filteredBirthdays = birthdays.filter(user => {
-            const birthMonthDay = user.birthdateFormatted.slice(5); // "MM-DD"
-            return [...Array(7)].some((_, i) => {
-                const weekDay = new Date(startOfWeek);
-                weekDay.setDate(startOfWeek.getDate() + i);
-                return weekDay.toISOString().slice(5, 10) === birthMonthDay;
-            });
-        });
-
+        // 📌 Filtrar cumpleaños solo de la fecha seleccionada (comparando mes y día)
+        const filteredBirthdays = birthdays.filter(user =>
+            user.birthdateFormatted.slice(5) === formattedDate.slice(5)
+        );
+        console.log("🎈 Cumpleaños filtrados para la fecha:", filteredBirthdays);
         setSelectedBirthdays(filteredBirthdays);
     };
 
@@ -117,14 +150,11 @@ function Dashboard() {
                         value={selectedDate}
                         tileContent={({ date, view }) => {
                             if (view === "month") {
-                                const formattedDate = new Date(date).toISOString().split("T")[0];
+                                const formattedDate = date.toISOString().split("T")[0];
 
-                                const hasEvent = events.some(event => {
-                                    const eventDate = new Date(event.date).toISOString().split("T")[0];
-                                    return eventDate === formattedDate;
-                                });
+                                const hasEvent = events.some(event => event.date === formattedDate);
 
-                                const hasBirthday = birthdays.some(user => 
+                                const hasBirthday = birthdays.some(user =>
                                     user.birthdateFormatted.slice(5) === formattedDate.slice(5)
                                 );
 
@@ -140,17 +170,17 @@ function Dashboard() {
                 </div>
 
                 <div className="events-section">
-                    <h3>📆 Eventos de la semana</h3>
+                    <h3>📆 Eventos del día</h3>
                     <ul>
-                        {selectedEvents.length === 0 ? <p>No hay eventos esta semana.</p> : selectedEvents.map(event => (
-                            <li key={event.id}>🔵 <strong>{event.title}</strong> - {event.date}</li>
+                        {selectedEvents.length === 0 ? <p>No hay eventos en esta fecha.</p> : selectedEvents.map((event, index) => (
+                            <li key={`${event.id}-${index}`}>🔵 <strong>{event.title}</strong> - {event.date}</li>
                         ))}
                     </ul>
 
-                    <h3>🎂 Cumpleaños de la semana</h3>
+                    <h3>🎂 Cumpleaños del día</h3>
                     <ul>
                         {selectedBirthdays.length === 0 ? (
-                            <p>No hay cumpleaños esta semana.</p>
+                            <p>No hay cumpleaños en esta fecha.</p>
                         ) : (
                             selectedBirthdays.map((user, index) => (
                                 <li key={`${user.id}-${index}`}>🎈 {user.name} - {user.birthdateFormatted}</li>

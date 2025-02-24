@@ -3,8 +3,10 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { FaEye, FaTrash, FaTimes } from "react-icons/fa";
 import { 
-    Box, Button, TextField, Select, MenuItem, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Paper, Divider 
+    Box, Button, TextField, Select, MenuItem, Typography, List, ListItem, ListItemText, 
+    ListItemSecondaryAction, IconButton, Paper, Divider 
 } from "@mui/material";
+import "../styles/estilos-optimizados.css"; // ✅ Importamos el archivo de estilos
 
 function ManageGroups() {
     const { user } = useContext(AuthContext);
@@ -121,24 +123,24 @@ function ManageGroups() {
     };
 
     return (
-        <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
-            <Typography variant="h5" gutterBottom>👥 Gestión de Grupos</Typography>
+        <Box className="container">
+            <Typography variant="h5" className="title">👥 Gestión de Grupos</Typography>
 
             {/* 📌 Crear Grupo */}
-            <Button variant="contained" onClick={() => setShowCreateGroup(!showCreateGroup)} sx={{ mb: 2 }}>
+            <Button className="btn-primary" onClick={() => setShowCreateGroup(!showCreateGroup)}>
                 {showCreateGroup ? <FaTimes /> : "+ Crear Grupo"}
             </Button>
 
             {showCreateGroup && (
-                <Paper sx={{ p: 2, mb: 2 }}>
+                <Paper className="form-container">
                     <TextField
                         fullWidth
                         label="Nombre del grupo"
                         value={newGroupName}
                         onChange={(e) => setNewGroupName(e.target.value)}
-                        sx={{ mb: 2 }}
+                        className="input-field"
                     />
-                    <Button variant="contained" onClick={handleCreateGroup}>Crear</Button>
+                    <Button className="btn-primary" onClick={handleCreateGroup}>Crear</Button>
                 </Paper>
             )}
 
@@ -147,13 +149,13 @@ function ManageGroups() {
             {groups.length === 0 ? (
                 <Typography variant="body2">⚠️ No hay grupos creados.</Typography>
             ) : (
-                <List>
+                <List className="group-list">
                     {groups.map((group) => (
-                        <ListItem key={group.id} button onClick={() => fetchGroupMembers(group)}>
+                        <ListItem key={group.id} className="group-item" button onClick={() => fetchGroupMembers(group)}>
                             <ListItemText primary={group.name} />
                             <ListItemSecondaryAction>
-                                <IconButton onClick={() => fetchGroupMembers(group)}>
-                                    <FaEye className="icon" />
+                                <IconButton onClick={() => fetchGroupMembers(group)} className="btn-view">
+                                    <FaEye />
                                 </IconButton>
                             </ListItemSecondaryAction>
                         </ListItem>
@@ -161,24 +163,25 @@ function ManageGroups() {
                 </List>
             )}
 
-            <Divider sx={{ my: 3 }} />
+            <Divider className="divider" />
 
             {/* 📌 Miembros del Grupo */}
             {selectedGroup && (
-                <Paper sx={{ p: 3 }}>
+                <Paper className="group-container">
                     <Typography variant="h6">👥 Miembros de: {selectedGroup.name}</Typography>
 
-                    <Button variant="contained" sx={{ mt: 2, mb: 2 }} onClick={() => setShowAddMember(!showAddMember)}>
+                    <Button className="btn-primary" onClick={() => setShowAddMember(!showAddMember)}>
                         {showAddMember ? <FaTimes /> : "➕ Agregar Miembro"}
                     </Button>
 
                     {showAddMember && (
-                        <Paper sx={{ p: 2, mb: 2 }}>
+                        <Paper className="form-container">
                             <Select
                                 fullWidth
                                 value={selectedUser}
                                 onChange={(e) => setSelectedUser(e.target.value)}
                                 displayEmpty
+                                className="select-input"
                             >
                                 <MenuItem value="" disabled>Selecciona un usuario</MenuItem>
                                 {users.map((user) => (
@@ -187,7 +190,7 @@ function ManageGroups() {
                                     </MenuItem>
                                 ))}
                             </Select>
-                            <Button variant="contained" sx={{ mt: 2 }} onClick={handleAddUserToGroup}>Agregar</Button>
+                            <Button className="btn-primary" onClick={handleAddUserToGroup}>Agregar</Button>
                         </Paper>
                     )}
 
@@ -196,11 +199,11 @@ function ManageGroups() {
                     ) : (
                         <List>
                             {selectedGroup.members.map((member) => (
-                                <ListItem key={member.id}>
+                                <ListItem key={member.id} className="member-item">
                                     <ListItemText primary={`${member.name} (${member.email})`} />
                                     <ListItemSecondaryAction>
-                                        <IconButton onClick={() => handleRemoveUserFromGroup(member.id)}>
-                                            <FaTrash className="icon" />
+                                        <IconButton onClick={() => handleRemoveUserFromGroup(member.id)} className="btn-delete">
+                                            <FaTrash />
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>

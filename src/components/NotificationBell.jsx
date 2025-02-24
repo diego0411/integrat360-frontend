@@ -6,16 +6,34 @@ function NotificationBell() {
 
     useEffect(() => {
         const socket = io(import.meta.env.VITE_API_URL.replace("/api", ""));
+
         socket.on("receiveNotification", (notification) => {
             setNotifications(prev => [...prev, notification]);
+
+            // 📌 Mostrar notificación en el navegador
+            if (Notification.permission === "granted") {
+                new Notification(notification.title, {
+                    body: notification.message,
+                    icon: "/icon.png"
+                });
+            }
         });
 
         return () => socket.disconnect();
     }, []);
 
+    // 📌 Pedir permiso para notificaciones si no está concedido
+    useEffect(() => {
+        if (Notification.permission === "default") {
+            Notification.requestPermission().then(permission => {
+                console.log("🔔 Permiso de notificación:", permission);
+            });
+        }
+    }, []);
+
     return (
         <div>
-            🔔 {notifications.length}
+            🔔 {notifications.length > 0 ? notifications.length : ""}
         </div>
     );
 }

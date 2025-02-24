@@ -17,9 +17,16 @@ function ManageEvents() {
 
     useEffect(() => {
         fetchEvents();
+
+        // 📌 Pedir permisos para notificaciones si aún no están concedidos
+        if (Notification.permission === "default") {
+            Notification.requestPermission().then((permission) => {
+                console.log("🔔 Permiso de notificación:", permission);
+            });
+        }
     }, []);
 
-    // 📌 Obtener eventos
+    // 📌 Obtener eventos creados por el usuario
     const fetchEvents = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -40,22 +47,28 @@ function ManageEvents() {
             return;
         }
 
-        if (new Date(date) < new Date()) {
-            alert("⛔ La fecha del evento debe ser futura.");
-            return;
-        }
+        // 🚀 Eliminamos la restricción que impedía registrar eventos en la fecha actual
 
         const eventData = { title, description, date, visibility };
 
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
-            await axios.post(`${import.meta.env.VITE_API_URL}/events`, eventData, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/events`, eventData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"
                 }
             });
+
+            // 📌 Mostrar notificación al usuario que creó el evento
+            showNotification("📅 Evento Creado", `Tu evento "${title}" ha sido registrado.`);
+
+            // 📌 Si el evento es público, mostrar notificación a todos los usuarios
+            if (visibility === "public") {
+                notifyAllUsers(`📅 Nuevo Evento Público: ${title}`, description || "Un nuevo evento ha sido publicado.");
+            }
+
             setTitle("");
             setDescription("");
             setDate("");
@@ -87,6 +100,35 @@ function ManageEvents() {
             setLoading(false);
         }
     };
+
+    // 📌 Mostrar notificación en el navegador (Para el usuario actual)
+    const showNotification = (title, message) => {
+        if (Notification.permission === "granted") {
+            const notification = new Notification(title, {
+                body: message,
+                icon: "/icon.png",
+            });
+
+            notification.onclick = () => {
+                window.open("/events", "_blank"); // 📌 Redirige a la página de eventos al hacer clic
+            };
+        }
+    };
+
+    // 📌 Notificar a todos los usuarios (Eventos públicos)
+const notifyAllUsers = async (title, message) => {
+    try {
+        const token = localStorage.getItem("token");
+        await axios.post(`${import.meta.env.VITE_API_URL}/notifications/public`, {
+            message: title + " - " + message,
+            type: "event",
+        }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    } catch (error) {
+        console.error("❌ Error al notificar a los usuarios:", error);
+    }
+};
 
     return (
         <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh", maxWidth: "800px", margin: "auto", borderRadius: 2, boxShadow: 1 }}>

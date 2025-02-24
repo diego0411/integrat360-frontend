@@ -1,7 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
-// ✅ Archivo de estilos para la alineación de mensajes
 
 function Chat() {
     const { user } = useContext(AuthContext);
@@ -13,12 +12,35 @@ function Chat() {
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("");
     const [error, setError] = useState(null);
+    const [lastMessageId, setLastMessageId] = useState(null); // Para rastrear el último mensaje recibido
 
     useEffect(() => {
+        requestNotificationPermission();
         fetchUsers();
         fetchGroups();
         fetchMessages();
     }, [selectedChat, selectedUser, selectedGroup]);
+
+    // 📌 Solicitar permisos de notificación
+    const requestNotificationPermission = () => {
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission !== "granted") {
+                    console.warn("⚠️ Notificaciones bloqueadas por el usuario.");
+                }
+            });
+        }
+    };
+
+    // 📌 Función para mostrar notificaciones en el navegador
+    const showNotification = (messageContent) => {
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Nuevo mensaje en el chat", {
+                body: messageContent,
+                icon: "/chat-icon.png"
+            });
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -51,7 +73,7 @@ function Chat() {
             setError(null);
             const token = localStorage.getItem("token");
             if (!token) return;
-    
+
             let url = `${import.meta.env.VITE_API_URL}/chat/public`;
             if (selectedChat === "private" && selectedUser) {
                 url = `${import.meta.env.VITE_API_URL}/chat/private/${selectedUser}`;
@@ -62,24 +84,36 @@ function Chat() {
                 }
                 url = `${import.meta.env.VITE_API_URL}/chat/group/${selectedGroup}`;
             }
-    
+
             console.log(`📢 Obteniendo mensajes desde: ${url}`);
             const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-    
+
             if (!res.data || !Array.isArray(res.data)) {
                 console.error("❌ Respuesta inválida:", res.data);
                 setError("Error al obtener mensajes.");
                 return;
             }
-    
-            setMessages(res.data.flat());
-            console.log("📩 Mensajes recibidos:", res.data);
+
+            const receivedMessages = res.data.flat();
+
+            // 📌 Detectar nuevos mensajes
+            if (receivedMessages.length > 0) {
+                const lastReceivedMessage = receivedMessages[receivedMessages.length - 1];
+
+                if (lastMessageId && lastReceivedMessage.id !== lastMessageId) {
+                    if (lastReceivedMessage.sender_id !== user.id) {
+                        showNotification(`${lastReceivedMessage.sender_name}: ${lastReceivedMessage.message}`);
+                    }
+                }
+                setLastMessageId(lastReceivedMessage.id);
+            }
+
+            setMessages(receivedMessages);
         } catch (error) {
             console.error("❌ Error al obtener mensajes:", error);
             setError("No se pudieron cargar los mensajes.");
         }
     };
-    
 
     const sendMessage = async () => {
         if (!message.trim()) return alert("⚠️ El mensaje no puede estar vacío.");
@@ -89,7 +123,6 @@ function Chat() {
             const token = localStorage.getItem("token");
             if (!token) return;
     
-            // 📌 Definir la estructura correcta para la API
             const data = { message, receiver_id: null, group_id: null };
     
             if (selectedChat === "private" && selectedUser) {
@@ -111,7 +144,6 @@ function Chat() {
             setError("No se pudo enviar el mensaje.");
         }
     };
-    
 
     return (
         <div className="chat-container">

@@ -7,6 +7,7 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 } from "@mui/material";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import "../styles/estilos-optimizados.css"; // ✅ Importamos el archivo de estilos
 
 function ManageUsers() {
     const { user } = useContext(AuthContext);
@@ -87,31 +88,31 @@ function ManageUsers() {
     };
 
     return (
-        <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh", maxWidth: "900px", margin: "auto", borderRadius: 2, boxShadow: 1 }}>
-            <Typography variant="h5" gutterBottom>👥 Gestión de Usuarios</Typography>
+        <Box className="container">
+            <Typography variant="h5" className="title">👥 Gestión de Usuarios</Typography>
 
             {/* 📌 Formulario de Registro y Edición */}
-            <Paper sx={{ p: 3, mb: 4 }}>
+            <Paper className="form-container">
                 <Typography variant="h6">{editUserId ? "Editar Usuario" : "Registrar Nuevo Usuario"}</Typography>
-                <Box component="form" onSubmit={handleRegisterOrEdit} sx={{ display: "grid", gap: 2, mt: 2 }}>
+                <Box component="form" onSubmit={handleRegisterOrEdit} className="form-grid">
                     <TextField size="small" label="Nombre" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} required />
                     <TextField size="small" label="Correo" type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} required />
                     {!editUserId && <TextField size="small" label="Contraseña" type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} required />}
                     <TextField size="small" label="Fecha de Nacimiento" type="date" value={newUser.birthdate} onChange={(e) => setNewUser({ ...newUser, birthdate: e.target.value })} required />
-                    <Select size="small" value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
+                    <Select size="small" value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} className="select-input">
                         <MenuItem value="user">Usuario</MenuItem>
                         <MenuItem value="admin">Administrador</MenuItem>
                     </Select>
-                    <Button type="submit" variant="contained">{editUserId ? "Actualizar" : "Registrar"}</Button>
-                    {editUserId && <Button variant="outlined" color="error" onClick={() => { setEditUserId(null); setNewUser({ name: "", email: "", password: "", role: "user", birthdate: "" }) }}>Cancelar</Button>}
+                    <Button type="submit" className="btn-primary">{editUserId ? "Actualizar" : "Registrar"}</Button>
+                    {editUserId && <Button className="btn-cancel" onClick={() => { setEditUserId(null); setNewUser({ name: "", email: "", password: "", role: "user", birthdate: "" }) }}>Cancelar</Button>}
                 </Box>
             </Paper>
 
             {/* 📌 Lista de Usuarios */}
             {loading ? (
-                <CircularProgress />
+                <CircularProgress className="loading-spinner" />
             ) : (
-                <TableContainer component={Paper} sx={{ mt: 4 }}>
+                <TableContainer component={Paper} className="table-container">
                     <Table size="small">
                         <TableHead>
                             <TableRow>
@@ -128,10 +129,10 @@ function ManageUsers() {
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>{user.role === "admin" ? "Administrador" : "Usuario"}</TableCell>
                                     <TableCell>
-                                        <Button size="small" onClick={() => handleEdit(user)} sx={{ minWidth: "auto", mr: 1 }}>
+                                        <Button size="small" onClick={() => handleEdit(user)} className="btn-icon">
                                             <FaEdit />
                                         </Button>
-                                        <Button size="small" color="error" onClick={() => handleDelete(user.id)} sx={{ minWidth: "auto" }}>
+                                        <Button size="small" color="error" onClick={() => handleDelete(user.id)} className="btn-icon">
                                             <FaTrash />
                                         </Button>
                                     </TableCell>

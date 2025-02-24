@@ -58,7 +58,6 @@ function FoldersProyectos() {
             setNewProjectName("");
             setOpenModal(false);
             fetchProjectFolders(); // Recargar la lista de carpetas
-
         } catch (error) {
             console.error("❌ Error al crear el proyecto:", error);
             alert("❌ No se pudo crear el proyecto.");
@@ -97,23 +96,21 @@ function FoldersProyectos() {
     };
 
     return (
-        <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh", maxWidth: "800px", margin: "auto", borderRadius: 2, boxShadow: 1 }}>
-            <Typography variant="h5" gutterBottom>📁 Gestión de Carpetas de Proyectos</Typography>
+        <Box className="folders-container">
+            <Typography variant="h5" className="title">📁 Gestión de Carpetas de Proyectos</Typography>
 
             {/* Botón para crear proyecto */}
             <Button 
-                variant="contained" 
-                color="primary" 
+                className="btn-primary"
                 startIcon={<FaPlus />} 
-                onClick={() => setOpenModal(true)} 
-                sx={{ mb: 3 }}
+                onClick={() => setOpenModal(true)}
             >
                 Crear Proyecto
             </Button>
 
             {/* 📌 Modal para ingresar el nombre del proyecto */}
             <Modal open={openModal} onClose={() => setOpenModal(false)}>
-                <Box sx={{ p: 3, backgroundColor: "white", borderRadius: 2, width: "90%", maxWidth: "400px", margin: "auto", mt: "10%", textAlign: "center", boxShadow: 3 }}>
+                <Box className="modal-box">
                     <Typography variant="h6">Crear Nuevo Proyecto</Typography>
                     <TextField
                         fullWidth
@@ -121,9 +118,9 @@ function FoldersProyectos() {
                         label="Nombre del Proyecto"
                         value={newProjectName}
                         onChange={(e) => setNewProjectName(e.target.value)}
-                        sx={{ my: 2 }}
+                        className="input-field"
                     />
-                    <Button variant="contained" color="primary" fullWidth onClick={createProject}>
+                    <Button className="btn-primary" fullWidth onClick={createProject}>
                         Crear Proyecto
                     </Button>
                 </Box>
@@ -131,7 +128,7 @@ function FoldersProyectos() {
 
             {/* 📂 Lista de Carpetas de Proyectos */}
             {loading ? (
-                <CircularProgress />
+                <CircularProgress className="loading-spinner" />
             ) : projectFolders.length === 0 ? (
                 <Typography>No hay carpetas de proyectos disponibles.</Typography>
             ) : (
@@ -150,17 +147,17 @@ function FoldersProyectos() {
                 </List>
             )}
 
-            <Divider sx={{ my: 3 }} />
+            <Divider className="divider" />
 
             {/* 📤 Sección de Subida de Archivos */}
             {selectedFolder && (
                 <Box className="upload-section">
                     <Typography variant="h6">📤 Subir Archivo</Typography>
                     <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-                    <Button variant="contained" color="secondary" onClick={handleFileUpload} disabled={uploading} sx={{ ml: 2 }}>
+                    <Button className="btn-secondary" onClick={handleFileUpload} disabled={uploading}>
                         {uploading ? "Subiendo..." : "Subir"}
                     </Button>
-                    <Button variant="outlined" color="error" onClick={() => setSelectedFolder(null)} sx={{ ml: 2 }}>
+                    <Button className="btn-cancel" onClick={() => setSelectedFolder(null)}>
                         Cancelar
                     </Button>
                 </Box>
