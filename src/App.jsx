@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import Sidebar from "./components/Sidebar";
@@ -11,30 +11,29 @@ import FoldersProyectos from "./pages/FoldersProyectos";
 import Login from "./pages/Login";
 import ManageGroups from "./pages/ManageGroups";
 import ManageEvents from "./pages/ManageEvents";
-import FolderContents from "./pages/FolderContents"
+import FolderContents from "./pages/FolderContents";
 import "./styles/estilos-optimizados.css";
-
 
 function AppContent() {
     const location = useLocation();
-    const { user } = useContext(AuthContext); // ✅ Obtiene el usuario autenticado
+    const { user } = useContext(AuthContext); // Ya no se usa para proteger rutas
     const hideSidebar = location.pathname === "/login";
 
     return (
         <div className="app-container">
-            {!hideSidebar && user && <Sidebar />}
+            {!hideSidebar && <Sidebar />}
 
             <div className={!hideSidebar ? "main-content" : ""}>
                 <Routes>
-                    <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-                    <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-                    <Route path="/folder/:folderId" element={user ? <FolderContents /> : <Navigate to="/login" />} />
-                    <Route path="/managegroups" element={user ? <ManageGroups /> : <Navigate to="/login" />} />
-                    <Route path="/manageevents" element={user ? <ManageEvents /> : <Navigate to="/login" />} />
-                    <Route path="/documents" element={user ? <Documents /> : <Navigate to="/login" />} />
-                    <Route path="/chat" element={user ? <Chat /> : <Navigate to="/login" />} />
-                    <Route path="/manage-users" element={user ? <ManageUsers /> : <Navigate to="/login" />} />
-                    <Route path="/folders" element={user ? <Folders /> : <Navigate to="/login" />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/folder/:folderId" element={<FolderContents />} />
+                    <Route path="/managegroups" element={<ManageGroups />} />
+                    <Route path="/manageevents" element={<ManageEvents />} />
+                    <Route path="/documents" element={<Documents />} />
+                    <Route path="/chat" element={<Chat />} />
+                    <Route path="/manage-users" element={<ManageUsers />} />
+                    <Route path="/folders" element={<Folders />} />
                     <Route path="/folders/projects" element={<FoldersProyectos />} />
                 </Routes>
             </div>
