@@ -23,7 +23,6 @@ function Dashboard() {
         handleDateChange(selectedDate);
     }, [events, birthdays]);
 
-    // 📌 Solicitar permiso de notificaciones
     const requestNotificationPermission = () => {
         if (Notification.permission === "default") {
             Notification.requestPermission().then(permission => {
@@ -32,11 +31,10 @@ function Dashboard() {
         }
     };
 
-    // 📌 Obtener datos del usuario y sus grupos
     const fetchUserData = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/user`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUserId(res.data.id);
@@ -46,7 +44,6 @@ function Dashboard() {
         }
     };
 
-    // 📌 Obtener eventos desde la API
     const fetchEvents = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -61,10 +58,9 @@ function Dashboard() {
 
             const allEvents = [...publicEvents.data, ...userEvents.data].map(event => ({
                 ...event,
-                date: new Date(event.date).toISOString().split("T")[0] // Convertir a formato YYYY-MM-DD
+                date: new Date(event.date).toISOString().split("T")[0]
             }));
 
-            console.log("📌 Eventos obtenidos desde la API:", allEvents);
             setEvents(allEvents);
             checkForNewEvents(allEvents);
         } catch (error) {
@@ -72,7 +68,6 @@ function Dashboard() {
         }
     };
 
-    // 📌 Verificar si hay nuevos eventos relevantes para el usuario
     const checkForNewEvents = (allEvents) => {
         if (!userId) return;
 
@@ -87,7 +82,6 @@ function Dashboard() {
         }
     };
 
-    // 📌 Enviar una notificación al usuario
     const sendNotification = (event) => {
         if (Notification.permission === "granted") {
             new Notification("📅 Nuevo evento disponible", {
@@ -97,13 +91,11 @@ function Dashboard() {
         }
     };
 
-    // 📌 Obtener cumpleaños desde la API
     const fetchBirthdays = async () => {
         try {
             const token = localStorage.getItem("token");
-            const month = new Date().getMonth() + 1;
 
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/users/birthdays?month=${month}`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/users/birthdays/upcoming`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -112,30 +104,22 @@ function Dashboard() {
                 birthdateFormatted: new Date(user.birthdate).toISOString().slice(0, 10)
             }));
 
-            console.log("🎂 Cumpleaños obtenidos desde la API:", birthdaysFormatted);
             setBirthdays(birthdaysFormatted);
         } catch (error) {
             console.error("❌ Error al obtener cumpleaños:", error);
         }
     };
 
-    // 📌 Manejar el cambio de fecha en el calendario
     const handleDateChange = (date) => {
         setSelectedDate(date);
         const formattedDate = new Date(date).toISOString().split("T")[0];
 
-        console.log(`📅 Mostrando eventos y cumpleaños para: ${formattedDate}`);
-
-        // 📌 Filtrar eventos solo de la fecha seleccionada
         const filteredEvents = events.filter(event => event.date === formattedDate);
-        console.log("🔵 Eventos filtrados para la fecha:", filteredEvents);
         setSelectedEvents(filteredEvents);
 
-        // 📌 Filtrar cumpleaños solo de la fecha seleccionada (comparando mes y día)
         const filteredBirthdays = birthdays.filter(user =>
             user.birthdateFormatted.slice(5) === formattedDate.slice(5)
         );
-        console.log("🎈 Cumpleaños filtrados para la fecha:", filteredBirthdays);
         setSelectedBirthdays(filteredBirthdays);
     };
 
@@ -153,7 +137,6 @@ function Dashboard() {
                                 const formattedDate = date.toISOString().split("T")[0];
 
                                 const hasEvent = events.some(event => event.date === formattedDate);
-
                                 const hasBirthday = birthdays.some(user =>
                                     user.birthdateFormatted.slice(5) === formattedDate.slice(5)
                                 );

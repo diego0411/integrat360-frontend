@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, Link } from "react-router-dom";
-import { 
-    Box, Typography, Button, TextField, Select, MenuItem, CircularProgress, 
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper 
+import {
+    Box, Typography, Button, TextField, Select, MenuItem, CircularProgress,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 } from "@mui/material";
 import { FaUpload, FaFolder, FaDownload } from "react-icons/fa";
 
@@ -21,32 +21,26 @@ function FolderContents() {
         loadFolderData();
     }, [folderId]);
 
-    // 📌 Cargar carpetas y documentos
     const loadFolderData = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem("token");
-            if (!token) return;
+            const headers = { Authorization: `Bearer ${token}` };
 
             const [contentRes, foldersRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_URL}/folders/${folderId}/contents`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${import.meta.env.VITE_API_URL}/folders`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${import.meta.env.VITE_API_URL}/folders/${folderId}/contents`, { headers }),
+                axios.get(`${import.meta.env.VITE_API_URL}/folders`, { headers })
             ]);
 
             setSubfolders(contentRes.data.subfolders || []);
             setDocuments(contentRes.data.documents || []);
 
-            let foldersArray = [];
-            if (Array.isArray(foldersRes.data)) {
-                foldersArray = foldersRes.data;
-            } else if (foldersRes.data?.ownFolders) {
-                foldersArray = [...foldersRes.data.ownFolders, ...(foldersRes.data.sharedFolders || [])];
-            }
+            const folders = foldersRes.data?.ownFolders
+                ? [...foldersRes.data.ownFolders, ...(foldersRes.data.sharedFolders || [])]
+                : foldersRes.data;
 
-            // 🔍 Obtener solo carpetas principales y excluir la actual
-            const mainFolders = foldersArray.filter(folder => !folder.parent_id && folder.id !== folderId);
+            const mainFolders = folders.filter(folder => !folder.parent_id && folder.id !== folderId);
             setAllFolders(mainFolders);
-
         } catch (error) {
             console.error("❌ Error al cargar contenido de la carpeta:", error);
         } finally {
@@ -54,16 +48,16 @@ function FolderContents() {
         }
     };
 
-    // 📂 Crear subcarpeta
     const createSubfolder = async () => {
         if (!newFolderName.trim()) return alert("⚠️ Ingresa un nombre para la subcarpeta.");
 
         try {
             const token = localStorage.getItem("token");
+            const headers = { Authorization: `Bearer ${token}` };
             await axios.post(`${import.meta.env.VITE_API_URL}/folders`, {
                 name: newFolderName,
                 parent_id: folderId
-            }, { headers: { Authorization: `Bearer ${token}` } });
+            }, { headers });
 
             setNewFolderName("");
             loadFolderData();
@@ -72,26 +66,19 @@ function FolderContents() {
         }
     };
 
-    // 📂 Mover subcarpeta
     const moveSubfolder = async (subfolderId, newParentId) => {
-        if (!subfolderId || !newParentId) {
-            alert("⚠️ Debes seleccionar una carpeta de destino válida.");
-            return;
-        }
-    
-        if (subfolderId === newParentId) {
-            alert("⛔ No puedes mover una carpeta dentro de sí misma.");
-            return;
-        }
-    
+        if (!subfolderId || !newParentId) return alert("⚠️ Selecciona una carpeta de destino válida.");
+        if (subfolderId === newParentId) return alert("⛔ No puedes mover una carpeta dentro de sí misma.");
+
         try {
             setMoving(true);
             const token = localStorage.getItem("token");
+            const headers = { Authorization: `Bearer ${token}` };
 
             await axios.put(`${import.meta.env.VITE_API_URL}/folders/move`, {
                 folder_id: subfolderId,
                 new_parent_id: newParentId
-            }, { headers: { Authorization: `Bearer ${token}` } });
+            }, { headers });
 
             alert("✅ Carpeta movida correctamente.");
             loadFolderData();
@@ -103,7 +90,6 @@ function FolderContents() {
         }
     };
 
-    // 📤 Subir archivo
     const uploadFile = async (event, targetFolderId) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -115,7 +101,11 @@ function FolderContents() {
         try {
             setUploading(true);
             const token = localStorage.getItem("token");
-            await axios.post(`${import.meta.env.VITE_API_URL}/documents`, formData, { headers: { Authorization: `Bearer ${token}` } });
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data"
+            };
+            await axios.post(`${import.meta.env.VITE_API_URL}/documents`, formData, { headers });
             loadFolderData();
         } catch (error) {
             console.error("❌ Error al subir el archivo:", error);
@@ -128,7 +118,6 @@ function FolderContents() {
         <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh", maxWidth: "800px", margin: "auto", borderRadius: 2, boxShadow: 1 }}>
             <Typography variant="h5" gutterBottom>📁 Contenido de la Carpeta</Typography>
 
-            {/* Crear Subcarpeta */}
             <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
                 <TextField
                     size="small"
@@ -143,7 +132,6 @@ function FolderContents() {
                 <CircularProgress />
             ) : (
                 <>
-                    {/* 📂 Subcarpetas */}
                     <Typography variant="h6">📂 Subcarpetas</Typography>
                     <TableContainer component={Paper} sx={{ mt: 2 }}>
                         <Table size="small">
@@ -189,7 +177,6 @@ function FolderContents() {
                         </Table>
                     </TableContainer>
 
-                    {/* 📄 Documentos */}
                     <Typography variant="h6" sx={{ mt: 4 }}>📄 Documentos</Typography>
                     <TableContainer component={Paper} sx={{ mt: 2 }}>
                         <Table size="small">
@@ -204,9 +191,7 @@ function FolderContents() {
                                     <TableRow key={doc.id}>
                                         <TableCell>{doc.name}</TableCell>
                                         <TableCell>
-                                            <Button variant="outlined" onClick={() => window.open(doc.url, "_blank")}>
-                                                <FaDownload /> Descargar
-                                            </Button>
+                                            <Button variant="outlined" onClick={() => window.open(doc.url, "_blank")}> <FaDownload /> Descargar </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}

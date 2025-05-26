@@ -11,8 +11,8 @@ function Folders() {
     const [showShareModal, setShowShareModal] = useState(false);
     const [users, setUsers] = useState([]);
     const [groups, setGroups] = useState([]);
-    const [selectedRecipient, setSelectedRecipient] = useState(""); // Usuario o grupo seleccionado
-    const [recipientType, setRecipientType] = useState("user"); // "user" o "group"
+    const [selectedRecipient, setSelectedRecipient] = useState("");
+    const [recipientType, setRecipientType] = useState("user");
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
 
@@ -27,7 +27,6 @@ function Folders() {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/folders`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
             setFolders({
                 ownFolders: res.data.ownFolders || [],
                 sharedFolders: res.data.sharedFolders || [],
@@ -41,10 +40,7 @@ function Folders() {
     };
 
     const createFolder = async () => {
-        if (!newFolderName.trim()) {
-            alert("⚠️ El nombre de la carpeta es obligatorio");
-            return;
-        }
+        if (!newFolderName.trim()) return alert("⚠️ El nombre de la carpeta es obligatorio");
 
         try {
             const token = localStorage.getItem("token");
@@ -60,14 +56,7 @@ function Folders() {
     };
 
     const deleteFolder = async (folderId) => {
-        if (!folderId) {
-            alert("⚠️ No se ha seleccionado una carpeta válida.");
-            return;
-        }
-
-        if (!window.confirm("⚠️ ¿Estás seguro de que quieres eliminar esta carpeta? Esta acción no se puede deshacer.")) {
-            return;
-        }
+        if (!folderId || !window.confirm("⚠️ ¿Estás seguro de eliminar esta carpeta?")) return;
 
         try {
             setDeleting(true);
@@ -75,9 +64,8 @@ function Folders() {
             await axios.delete(`${import.meta.env.VITE_API_URL}/folders/${folderId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
-            alert("✅ Carpeta eliminada correctamente.");
             fetchFolders();
+            alert("✅ Carpeta eliminada correctamente.");
         } catch (error) {
             console.error("❌ Error al eliminar la carpeta:", error);
             alert(`❌ No se pudo eliminar la carpeta: ${error.response?.data?.error || "Error desconocido"}`);
@@ -86,16 +74,13 @@ function Folders() {
         }
     };
 
-    // 📌 Obtener lista de usuarios y grupos
     const fetchUsersAndGroups = async () => {
         try {
             const token = localStorage.getItem("token");
-
             const [usersRes, groupsRes] = await Promise.all([
                 axios.get(`${import.meta.env.VITE_API_URL}/users`, { headers: { Authorization: `Bearer ${token}` } }),
                 axios.get(`${import.meta.env.VITE_API_URL}/groups`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
-
             setUsers(usersRes.data);
             setGroups(groupsRes.data);
         } catch (error) {
@@ -103,46 +88,32 @@ function Folders() {
         }
     };
 
-    // 📌 Compartir carpeta con usuario o grupo
     const shareFolder = async () => {
-        if (!selectedFolder || !selectedRecipient) {
-            alert("⚠️ Selecciona un usuario o grupo válido.");
-            return;
-        }
-    
+        if (!selectedFolder || !selectedRecipient) return alert("⚠️ Selecciona un usuario o grupo válido.");
+
         try {
             const token = localStorage.getItem("token");
-    
-            // 📌 Corregimos el endpoint según las rutas del backend
             const endpoint = recipientType === "user" ? "/folders/share" : "/folders/share/group";
-    
             const body = recipientType === "user" 
                 ? { folderId: selectedFolder, userId: selectedRecipient } 
                 : { folderId: selectedFolder, groupId: selectedRecipient };
-    
-            // 🔍 Agregar log para depuración antes de la solicitud
-            console.log("📂 Compartiendo carpeta con:", { endpoint, body });
-    
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, body, {
+
+            await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, body, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-    
+
             alert("✅ Carpeta compartida exitosamente.");
             setShowShareModal(false);
             setSelectedRecipient("");
-            console.log("✅ Respuesta del servidor:", res.data);
         } catch (error) {
-            console.error("❌ Error al compartir la carpeta:", error.response?.data || error.message);
+            console.error("❌ Error al compartir la carpeta:", error);
             alert(`❌ No se pudo compartir la carpeta: ${error.response?.data?.error || "Error desconocido"}`);
         }
     };
-    
-    
 
     return (
         <div className="folders-container">
             <h1>📂 Gestión Documental</h1>
-
             <div className="folder-form">
                 <input
                     type="text"
@@ -161,34 +132,32 @@ function Folders() {
                     <p className="loading-text">Cargando carpetas...</p>
                 ) : (
                     <ul className="folder-list">
-                        {folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) =>
-                            folder && (
-                                <li key={`${folder.id}-${index}`} className="folder-item" onClick={() => navigate(`/folder/${folder.id}`)}>
-                                    <FaFolder className="folder-icon" />
-                                    <span className="folder-name">{folder.name || "Sin nombre"}</span>
-                                    <div className="folder-actions">
-                                        <FaShare 
-                                            className="share-icon" 
-                                            title="Compartir"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedFolder(folder.id);
-                                                setShowShareModal(true);
-                                                fetchUsersAndGroups();
-                                            }}
-                                        />
-                                        <FaTrash 
-                                            className="delete-icon" 
-                                            title="Eliminar" 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                deleteFolder(folder.id);
-                                            }}
-                                        />
-                                    </div>
-                                </li>
-                            )
-                        )}
+                        {folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) => (
+                            <li key={`${folder.id}-${index}`} className="folder-item" onClick={() => navigate(`/folder/${folder.id}`)}>
+                                <FaFolder className="folder-icon" />
+                                <span className="folder-name">{folder.name || "Sin nombre"}</span>
+                                <div className="folder-actions">
+                                    <FaShare 
+                                        className="share-icon" 
+                                        title="Compartir"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedFolder(folder.id);
+                                            setShowShareModal(true);
+                                            fetchUsersAndGroups();
+                                        }}
+                                    />
+                                    <FaTrash 
+                                        className="delete-icon" 
+                                        title="Eliminar" 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteFolder(folder.id);
+                                        }}
+                                    />
+                                </div>
+                            </li>
+                        ))}
                     </ul>
                 )}
             </div>
@@ -202,9 +171,9 @@ function Folders() {
                             <option value="group">Grupo</option>
                         </select>
                         <select value={selectedRecipient} onChange={(e) => setSelectedRecipient(e.target.value)}>
-                            {recipientType === "user" 
-                                ? users.map(user => <option key={user.id} value={user.id}>{user.name}</option>) 
-                                : groups.map(group => <option key={group.id} value={group.id}>{group.name}</option>)}
+                            {(recipientType === "user" ? users : groups).map(item => (
+                                <option key={item.id} value={item.id}>{item.name}</option>
+                            ))}
                         </select>
                         <button className="btn-primary" onClick={shareFolder}>Compartir</button>
                         <button className="btn-cancel" onClick={() => setShowShareModal(false)}>
