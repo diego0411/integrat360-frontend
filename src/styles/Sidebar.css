@@ -1,0 +1,74 @@
+/* 📌 Franja azul para el logo */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: #0D47A1; /* Azul más oscuro */
+    height: 60px;
+}
+
+/* 📌 Tamaño y alineación del logo */
+.logo {
+    height: 40px;
+    margin-left: 10px;
+}
+
+/* 📌 Botón para ocultar el Sidebar */
+.toggle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+/* 📌 Menú del Sidebar */
+.sidebar-menu {
+    padding-top: 20px;
+}
+
+/* 📌 Texto del menú en blanco */
+.sidebar-menu .MuiListItemText-primary {
+    color: white !important;
+}
+
+/* 📌 Botón de "Cerrar sesión" más grande */
+.logout-button {
+    width: 100%;
+    background: red;
+    color: white;
+    font-size: 18px;
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.logout-button svg {
+    margin-right: 8px;
+}
+/* 📌 Franja azul para el logo */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: #0D47A1; /* Azul más oscuro */
+    height: 80px; /* Ajuste para un logo más grande */
+}
+
+/* 📌 Tamaño y alineación del logo */
+.logo {
+    height: 60px; /* Aumenta el tamaño del logo */
+    width: auto;
+    max-width: 150px;
+}
+
+/* 📌 Botón para ocultar el Sidebar */
+.toggle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}

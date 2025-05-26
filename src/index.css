@@ -1,0 +1,449 @@
+/* Importar fuente */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+/* Variables de colores basados en Solaria */
+:root {
+    --primary-color: #005BAC;  /* Azul Solaria */
+    --secondary-color: #E5E5E5; /* Gris claro */
+    --text-color: #333;
+    --white: #ffffff;
+    --button-color: #FF3B30; /* Rojo Solaria */
+    --hover-button-color: #D32F2F;
+}
+
+/* Estilos base */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Botones */
+button {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: var(--hover-button-color);
+}
+
+/* Inputs y Selects */
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Contenedor principal */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 250px; /* Para que respete el espacio del sidebar */
+}
+
+/* ✅ Estilos para la lista de usuarios y lista de chats */
+.user-list,
+.chat-messages {
+    background: var(--white); /* ✅ Fondo blanco */
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-height: 400px; /* Ajuste para scroll */
+    overflow-y: auto;
+}
+
+/* ✅ Estilos específicos para los mensajes */
+.chat-messages .message {
+    display: flex;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    max-width: 70%;
+}
+
+/* ✅ Mensajes alineados a la derecha (usuario autenticado) */
+.chat-messages .sent {
+    background: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+/* ✅ Mensajes alineados a la izquierda (otros usuarios) */
+.chat-messages .received {
+    background: #f1f1f1;
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+/* ✅ Estilos para la entrada de mensajes */
+.chat-input {
+    display: flex;
+    margin-top: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--primary-color);
+}
+
+.chat-input button {
+    padding: 10px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+/* ✅ Estilos para la lista de usuarios en formato Grid */
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* ✅ Tarjeta de usuario */
+.user-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* ✅ Estilos para los botones */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    margin: 5px;
+}
+
+.delete-btn {
+    color: red;
+}
+/* ✅ Estilos para la lista de usuarios en formato Grid */
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* ✅ Tarjetas de usuario más pequeñas */
+.user-card.small-card {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 12px;
+    min-width: 140px;
+    max-width: 160px;
+}
+
+/* ✅ Reducir el tamaño del formulario */
+.form-container.small-form {
+    max-width: 400px;
+    margin: auto;
+}
+
+/* ✅ Estilos para los botones de acción */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* ✅ Ícono de edición en amarillo */
+.edit-btn {
+    color: #FFC107;
+}
+
+/* ✅ Ícono de eliminación en rojo */
+.delete-btn {
+    color: #FF3B30;
+}
+/* ✅ Ajuste global del calendario */
+.react-calendar {
+    width: 100%;
+    max-width: 350px;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+}
+
+/* ✅ Texto del calendario */
+.react-calendar__tile {
+    color: #333 !important; /* Texto negro para visibilidad */
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+/* ✅ Días de la semana */
+.react-calendar__month-view__weekdays {
+    color: var(--primary-color);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* ✅ Día actual */
+.react-calendar__tile--now {
+    background: var(--button-color); /* Rojo Solaria */
+    color: white !important;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+/* ✅ Día seleccionado */
+.react-calendar__tile--active {
+    background: var(--primary-color) !important; /* Azul Solaria */
+    color: white !important;
+    border-radius: 6px;
+}
+
+/* ✅ Eventos y cumpleaños en el calendario */
+.react-calendar__tile .event-marker {
+    font-size: 14px;
+    color: #FFC107; /* Amarillo para eventos */
+    font-weight: bold;
+}
+
+.react-calendar__tile .birthday-marker {
+    font-size: 14px;
+    color: #FF3B30; /* Rojo para cumpleaños */
+    font-weight: bold;
+}
+
+/* ✅ Botones de navegación */
+.react-calendar__navigation button {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.react-calendar__navigation button:hover {
+    background: var(--hover-button-color);
+}
+
+/* ✅ Lista de eventos */
+.events-section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.events-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.events-section li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    color: black; /* ✅ Se asegura de que el texto sea visible */
+}
+
+/* ✅ Ajuste de la estructura del Dashboard */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dashboard-content {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.calendar-container {
+    max-width: 350px;
+}
+
+.events-section {
+    max-width: 400px;
+}
+.groups-section {
+    display: flex;
+    gap: 20px;
+}
+
+.groups-list, .members-list {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 45%;
+}
+
+.toggle-btn {
+    background: #005BAC;
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.group-items, .member-items {
+    list-style: none;
+    padding: 0;
+}
+
+.group-item, .member-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.delete-btn {
+    color: red;
+}
+/* Contenedor principal de grupos */
+.groups-container {
+    display: flex;
+    justify-content: flex-start; /* Alinea las tarjetas en línea */
+    gap: 20px; /* Espacio entre tarjetas */
+    padding: 20px;
+    flex-wrap: wrap; /* Asegura que en pantallas pequeñas se acomoden */
+}
+
+/* Estilos para cada tarjeta */
+.group-list, .group-members {
+    background-color: white; /* Fondo blanco */
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-width: 300px;
+}
+
+/* Estilo para los títulos dentro de cada tarjeta */
+.group-list h2, .group-members h2 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+/* Botones principales */
+.btn-primary {
+    background-color: #005BAC; /* Azul Solaria */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary:hover {
+    background-color: #004080;
+}
+
+/* Botón de cancelar */
+.btn-cancel {
+    background-color: #ccc;
+    color: black;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background-color: #999;
+}
+
+/* Botón de ver miembros */
+.btn-view {
+    background-color: #FF3B30; /* Rojo Solaria */
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.btn-view:hover {
+    background-color: #D32F2F;
+}
+
+/* Botón de eliminar */
+.btn-delete {
+    background-color: transparent;
+    border: none;
+    color: red;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    color: darkred;
+}
+
+/* Estilo para la lista de grupos */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Ocultar la línea en el último elemento de la lista */
+li:last-child {
+    border-bottom: none;
+}

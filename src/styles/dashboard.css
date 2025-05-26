@@ -1,0 +1,92 @@
+@import "./estilos-optimizados.css";
+
+/* 📊 Contenedor del Dashboard */
+.dashboard-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+/* 📅 Sección del calendario */
+.calendar-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* 🎉 Iconos en el calendario */
+.calendar-icons {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.event-marker {
+    font-size: 14px;
+    color: var(--secondary-color);
+}
+
+.birthday-marker {
+    font-size: 14px;
+    color: #ff4081;
+}
+
+/* 📋 Lista de eventos y cumpleaños */
+.events-section {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.events-section h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.events-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.events-section li {
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.events-section li:last-child {
+    border-bottom: none;
+}
+
+.events-section li strong {
+    font-weight: 600;
+}
+
+/* 📱 Ajustes Responsivos */
+@media (max-width: 768px) {
+    .dashboard-container {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .calendar-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .events-section {
+        padding: 10px;
+    }
+
+    .events-section h3 {
+        font-size: 16px;
+    }
+}
