@@ -13,6 +13,8 @@ import ManageGroups from "./pages/ManageGroups";
 import ManageEvents from "./pages/ManageEvents";
 import FolderContents from "./pages/FolderContents";
 import "./styles/estilos-optimizados.css";
+import "./lib/axios-global"; // 👈 Esto modifica axios global
+
 
 function ProtectedRoute({ children }) {
     const { user } = useContext(AuthContext);
