@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaTrash, FaShare, FaFolder, FaPlus, FaTimes } from "react-icons/fa";
+import { FaTrash, FaShare, FaFolder, FaPlus, FaTimes, FaUpload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 function Folders() {
@@ -15,6 +15,7 @@ function Folders() {
     const [recipientType, setRecipientType] = useState("user");
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
+    const [uploadingFolderId, setUploadingFolderId] = useState(null);
 
     useEffect(() => {
         fetchFolders();
@@ -74,6 +75,31 @@ function Folders() {
         }
     };
 
+    const uploadFile = async (event, folderId) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder_id", folderId);
+
+        try {
+            setUploadingFolderId(folderId);
+            const token = localStorage.getItem("token");
+            await axios.post(`${import.meta.env.VITE_API_URL}/documents`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+            fetchFolders();
+        } catch (error) {
+            console.error("❌ Error al subir archivo:", error);
+        } finally {
+            setUploadingFolderId(null);
+        }
+    };
+
     const fetchUsersAndGroups = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -94,8 +120,8 @@ function Folders() {
         try {
             const token = localStorage.getItem("token");
             const endpoint = recipientType === "user" ? "/folders/share" : "/folders/share/group";
-            const body = recipientType === "user" 
-                ? { folderId: selectedFolder, userId: selectedRecipient } 
+            const body = recipientType === "user"
+                ? { folderId: selectedFolder, userId: selectedRecipient }
                 : { folderId: selectedFolder, groupId: selectedRecipient };
 
             await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, body, {
@@ -114,6 +140,7 @@ function Folders() {
     return (
         <div className="folders-container">
             <h1>📂 Gestión Documental</h1>
+
             <div className="folder-form">
                 <input
                     type="text"
@@ -132,32 +159,47 @@ function Folders() {
                     <p className="loading-text">Cargando carpetas...</p>
                 ) : (
                     <ul className="folder-list">
-                        {folders.ownFolders.concat(folders.sharedFolders, folders.sharedGroupFolders).map((folder, index) => (
-                            <li key={`${folder.id}-${index}`} className="folder-item" onClick={() => navigate(`/folder/${folder.id}`)}>
-                                <FaFolder className="folder-icon" />
-                                <span className="folder-name">{folder.name || "Sin nombre"}</span>
-                                <div className="folder-actions">
-                                    <FaShare 
-                                        className="share-icon" 
-                                        title="Compartir"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedFolder(folder.id);
-                                            setShowShareModal(true);
-                                            fetchUsersAndGroups();
-                                        }}
-                                    />
-                                    <FaTrash 
-                                        className="delete-icon" 
-                                        title="Eliminar" 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteFolder(folder.id);
-                                        }}
-                                    />
-                                </div>
-                            </li>
-                        ))}
+                        {folders.ownFolders
+                            .concat(folders.sharedFolders, folders.sharedGroupFolders)
+                            .filter(folder => !folder.area || !folder.area.toLowerCase().includes("proyecto"))
+                            .map((folder, index) => (
+                                <li key={`${folder.id}-${index}`} className="folder-item">
+                                    <div onClick={() => navigate(`/folder/${folder.id}`)}>
+                                        <FaFolder className="folder-icon" />
+                                        <span className="folder-name">{folder.name || "Sin nombre"}</span>
+                                    </div>
+                                    <div className="folder-actions">
+                                        <label htmlFor={`upload-${folder.id}`}>
+                                            <FaUpload title="Subir archivo" className="upload-icon" />
+                                        </label>
+                                        <input
+                                            type="file"
+                                            id={`upload-${folder.id}`}
+                                            style={{ display: "none" }}
+                                            onChange={(e) => uploadFile(e, folder.id)}
+                                            disabled={uploadingFolderId === folder.id}
+                                        />
+                                        <FaShare
+                                            className="share-icon"
+                                            title="Compartir"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedFolder(folder.id);
+                                                setShowShareModal(true);
+                                                fetchUsersAndGroups();
+                                            }}
+                                        />
+                                        <FaTrash
+                                            className="delete-icon"
+                                            title="Eliminar carpeta"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteFolder(folder.id);
+                                            }}
+                                        />
+                                    </div>
+                                </li>
+                            ))}
                     </ul>
                 )}
             </div>

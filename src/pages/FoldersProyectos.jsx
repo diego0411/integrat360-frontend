@@ -15,7 +15,7 @@ import {
   CircularProgress,
   Divider
 } from "@mui/material";
-import { FaFolder, FaUpload, FaPlus } from "react-icons/fa";
+import { FaFolder, FaUpload, FaPlus, FaTrash } from "react-icons/fa";
 
 function FoldersProyectos() {
   const navigate = useNavigate();
@@ -69,6 +69,27 @@ function FoldersProyectos() {
     } catch (error) {
       console.error("❌ Error al crear el proyecto:", error.response?.data || error.message);
       alert("❌ No se pudo crear el proyecto.");
+    }
+  };
+
+  const deleteProjectFolder = async (folderId) => {
+    if (!window.confirm("⚠️ ¿Deseas eliminar esta carpeta de proyecto y todas sus subcarpetas y archivos?")) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return alert("⚠️ No estás autenticado.");
+    }
+
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/folders/${folderId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      alert("✅ Carpeta de proyecto eliminada correctamente.");
+      fetchProjectFolders();
+    } catch (error) {
+      console.error("❌ Error al eliminar la carpeta del proyecto:", error.response?.data || error.message);
+      alert("❌ No se pudo eliminar la carpeta del proyecto.");
     }
   };
 
@@ -161,6 +182,15 @@ function FoldersProyectos() {
                 }}
               >
                 <FaUpload className="upload-icon" />
+              </IconButton>
+              <IconButton
+                aria-label="Eliminar carpeta"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteProjectFolder(folder.id);
+                }}
+              >
+                <FaTrash className="delete-icon" />
               </IconButton>
             </ListItem>
           ))}
